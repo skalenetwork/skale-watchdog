@@ -24,16 +24,25 @@ from flask import Flask, request
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE, FLASK_SECRET_KEY
 from utils.helper import construct_err_response, construct_ok_response
 from utils.helper import init_default_logger
+from utils.docker_utils import DockerUtils
 
 init_default_logger()
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
+docker_utils = DockerUtils()
 
 
 @app.route('/', methods=['GET'])
 def _address():
     return construct_ok_response({'test_response': 'response OK!'})
+
+
+@app.route('/healthchecks', methods=['GET'])
+def containers_healthcheck():
+    logger.debug(request)
+    containers_list = docker_utils.get_all_skale_containers(all=all, format=True)
+    return construct_ok_response(containers_list)
 
 
 if __name__ == '__main__':
