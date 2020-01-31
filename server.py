@@ -38,10 +38,24 @@ def _address():
     return construct_ok_response({'test_response': 'response OK!'})
 
 
-@app.route('/healthchecks', methods=['GET'])
-def containers_healthcheck():
+@app.route('/status/all', methods=['GET'])
+def containers_status_all():
     logger.debug(request)
     containers_list = docker_utils.get_all_skale_containers(all=all, format=True)
+    return construct_ok_response(containers_list)
+
+
+@app.route('/status/schain', methods=['GET'])
+def containers_schains_status():
+    logger.debug(request)
+    containers_list = docker_utils.get_all_schain_containers(all=all, format=True)
+    return construct_ok_response(containers_list)
+
+
+@app.route('/status/core', methods=['GET'])
+def containers_core_status():
+    logger.debug(request)
+    containers_list = docker_utils.get_core_skale_containers(all=all, format=True)
     return construct_ok_response(containers_list)
 
 

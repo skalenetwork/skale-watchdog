@@ -86,11 +86,21 @@ class DockerUtils:
 
     @format_containers
     def get_all_skale_containers(self, all=False, format=False):
-        return self.client.containers.list(all=all, filters={'name': 'mysql*'})
+        return self.client.containers.list(all=all, filters={'name': 'skale_*'})
 
     @format_containers
     def get_all_schain_containers(self, all=False, format=False):
         return self.client.containers.list(all=all, filters={'name': 'skale_schain_*'})
+
+    @format_containers
+    def get_core_skale_containers(self, all=False, format=False):
+        containers_list = self.client.containers.list(
+            all=all, filters={'name': 'skale_*'})
+        return list(filter(lambda container: self.is_core_container(container), containers_list))
+
+    def is_core_container(self, container):
+        name = container.attrs['Name']
+        return not name.startswith('/skale_schain') and not name.startswith('/skale_ima')
 
     def get_info(self, container_id):
         container_info = {}
