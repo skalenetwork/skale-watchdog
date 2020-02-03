@@ -7,10 +7,10 @@ REPO_NAME=skalenetwork/$NAME
 IMAGE_NAME=$REPO_NAME:$VERSION
 LATEST_IMAGE_NAME=$REPO_NAME:latest
 
-: "${USERNAME?Need to set USERNAME}"
-: "${PASSWORD?Need to set PASSWORD}"
+: "${DOCKER_USERNAME?Need to set USERNAME}"
+: "${DOCKER_PASSWORD?Need to set PASSWORD}"
 
-echo "$PASSWORD" | docker login --username $USERNAME --password-stdin
+echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
 docker push $IMAGE_NAME || exit $?
 if [ "$RELEASE" = true ]
 then

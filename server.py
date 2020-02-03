@@ -33,11 +33,6 @@ app = Flask(__name__)
 docker_utils = DockerUtils()
 
 
-@app.route('/', methods=['GET'])
-def _address():
-    return construct_ok_response({'test_response': 'response OK!'})
-
-
 @app.route('/status/all', methods=['GET'])
 def containers_status_all():
     logger.debug(request)
