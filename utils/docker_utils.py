@@ -57,7 +57,6 @@ class DockerUtils:
     def init_docker_client(self):
         docker_client = docker.from_env()
         print(f'USER PASS = {DOCKER_USERNAME} {DOCKER_PASSWORD}')
-        # docker_client.login(username=DOCKER_USERNAME, password=DOCKER_PASSWORD)
         return docker_client
 
     def init_docker_cli(self):

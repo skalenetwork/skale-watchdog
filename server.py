@@ -21,8 +21,8 @@ import logging
 
 from flask import Flask, request
 
-from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE, FLASK_SECRET_KEY
-from utils.helper import construct_err_response, construct_ok_response
+from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
+from utils.helper import construct_ok_response
 from utils.helper import init_default_logger
 from utils.docker_utils import DockerUtils
 
@@ -56,6 +56,4 @@ def containers_core_status():
 
 if __name__ == '__main__':
     logger.info(f'Starting SKALE docker containers Watchdog')
-    app.secret_key = FLASK_SECRET_KEY
-
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT, host=FLASK_APP_HOST, use_reloader=False)
