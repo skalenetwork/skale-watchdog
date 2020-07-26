@@ -30,6 +30,9 @@ init_default_logger()
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
+app.port = FLASK_APP_PORT
+app.host = FLASK_APP_HOST
+app.use_reloader = False
 docker_utils = DockerUtils()
 
 
