@@ -60,3 +60,4 @@ jobs:
             branch:
               - develop
               - beta
+              - stable
