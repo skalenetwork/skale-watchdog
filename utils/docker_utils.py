@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def format_containers(f):
     @wraps(f)
-    def inner(*args, **kwargs):
+    def inner(*args, **kwargs) -> list:
         format = kwargs.get('format', None)
         containers = f(*args, **kwargs)
         if not format:
@@ -90,6 +90,10 @@ class DockerUtils:
     @format_containers
     def get_all_schain_containers(self, all=False, format=False):
         return self.client.containers.list(all=all, filters={'name': 'skale_schain_*'})
+
+    @format_containers
+    def get_all_containers(self, all=False, format=False):
+        return self.client.containers.list(all=all)
 
     @format_containers
     def get_core_skale_containers(self, all=False, format=False):
