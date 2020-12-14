@@ -19,16 +19,13 @@
 
 import logging
 
-from flask import Flask, request, redirect
-
+from flask import Flask, request
 
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.helper import construct_ok_response
 from utils.helper import init_default_logger
 from utils.docker_utils import DockerUtils
 
-
-SKALE_NODE_API_CORE_STATUS = 'http://localhost:3007/healthcheck/containers'
 init_default_logger()
 
 logger = logging.getLogger(__name__)
@@ -56,9 +53,8 @@ def containers_schains_status():
 @app.route('/status/core', methods=['GET'])
 def containers_core_status():
     logger.debug(request)
-    # containers_list = docker_utils.get_core_skale_containers(all=all, format=True)
-    # return construct_ok_response(containers_list)
-    return redirect(SKALE_NODE_API_CORE_STATUS)
+    containers_list = docker_utils.get_core_skale_containers(all=all, format=True)
+    return construct_ok_response(containers_list)
 
 
 if __name__ == '__main__':
