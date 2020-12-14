@@ -64,28 +64,30 @@ def get_api_healthcheck(api_url):
     try:
         response = requests.get(url, timeout=API_TIMEOUT)
     except requests.exceptions.ConnectionError as err:
-        logger.info(f'Could not connect to {url}')
-        logger.error(err)
-        return 1
+        err_msg = f'Could not connect to {url}'
+        logger.error(f'{err_msg}. {err}')
+        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
     except Exception as err:
-        logger.info(f'Could not get data from {url}')
-        logger.error(err)
-        return 1
+        err_msg = f'Could not get data from {url}'
+        logger.error(f'{err_msg}. {err}')
+        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
 
     if response.status_code != requests.codes.ok:
-        logger.info(f'Request to {url} failed, status code: {response.status_code}')
-        return 1
+        err_msg = f'Request to {url} failed, status code: {response.status_code}'
+        logger.error(err_msg)
+        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
 
     res = response.json()
     if res.get('error') is not None:
         logger.info(res['error'])
-        return 1
+        return construct_err_response(HTTPStatus.BAD_GATEWAY, res['error'])
     data = res.get('data')
     if data is None:
-        logger.info(f'No data found checking {url}')
-        return 1
+        err_msg = f'No data found in response checking {url}'
+        logger.info(err_msg)
+        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
 
-    return data
+    return construct_ok_response(data)
 
 
 def get_containers_healthcheck_url(api_url):

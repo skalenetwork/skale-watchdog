@@ -38,8 +38,9 @@ app.use_reloader = False
 @app.route('/status/core', methods=['GET'])
 def containers_core_status():
     logger.debug(request)
-    containers_list = get_api_healthcheck(API_CONT_HEALTH_URL)
-    return construct_ok_response(containers_list)
+    # containers_list = get_api_healthcheck(API_CONT_HEALTH_URL)
+    # return construct_ok_response(containers_list)
+    return get_api_healthcheck(API_CONT_HEALTH_URL)
 
 
 if __name__ == '__main__':
