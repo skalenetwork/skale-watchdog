@@ -24,7 +24,6 @@ from flask import Flask, request
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.helper import construct_ok_response
 from utils.helper import init_default_logger, get_api_healthcheck
-from utils.docker_utils import DockerUtils
 from configs import API_CONT_HEALTH_URL
 
 init_default_logger()
@@ -34,28 +33,12 @@ app = Flask(__name__)
 app.port = FLASK_APP_PORT
 app.host = FLASK_APP_HOST
 app.use_reloader = False
-docker_utils = DockerUtils()
-
-
-@app.route('/status/all', methods=['GET'])
-def containers_status_all():
-    logger.debug(request)
-    containers_list = docker_utils.get_all_skale_containers(all=all, format=True)
-    return construct_ok_response(containers_list)
-
-
-@app.route('/status/schain', methods=['GET'])
-def containers_schains_status():
-    logger.debug(request)
-    containers_list = docker_utils.get_all_schain_containers(all=all, format=True)
-    return construct_ok_response(containers_list)
 
 
 @app.route('/status/core', methods=['GET'])
 def containers_core_status():
     logger.debug(request)
     containers_list = get_api_healthcheck(API_CONT_HEALTH_URL)
-    # containers_list = docker_utils.get_core_skale_containers(all=all, format=True)
     return construct_ok_response(containers_list)
 
 

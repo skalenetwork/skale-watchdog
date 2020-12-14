@@ -58,39 +58,6 @@ def construct_ok_response(data=None):
     return construct_response(HTTPStatus.OK, {'data': data, 'error': None})
 
 
-def retry(exceptions, times, delay=0):
-    """
-    Retry Decorator
-
-    Retries the wrapped function/method `times` times if the exceptions listed
-    in ``exceptions`` are thrown
-
-    :param Exceptions: Lists of exceptions that trigger a retry attempt
-    :type Exceptions: Tuple of Exceptions
-    :param times: The number of times to repeat the wrapped function/method
-    :type times: Int
-    :param delay: Delay between attempts in seconds. default: 0
-    :type delay: Int
-    """
-    def decorator(func):
-        def newfn(*args, **kwargs):
-            attempt = 0
-            while attempt < times:
-                try:
-                    return func(*args, **kwargs)
-                except exceptions:
-                    logger.info(
-                        'Exception thrown when attempting to run %s, attempt '
-                        '%d of %d' % (func, attempt, times),
-                        exc_info=True
-                    )
-                    attempt += 1
-                    sleep(delay)
-            return func(*args, **kwargs)
-        return newfn
-    return decorator
-
-
 def get_api_healthcheck(api_url):
     """Return 0 if OK or 1 if failed."""
     url = get_containers_healthcheck_url(api_url)
