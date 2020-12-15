@@ -22,8 +22,7 @@ import logging
 from flask import Flask, request
 
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.helper import construct_ok_response
-from utils.helper import init_default_logger, get_api_healthcheck
+from utils.helper import init_default_logger, get_healthcheck_from_skale_api
 from configs import API_CONT_HEALTH_URL
 
 init_default_logger()
@@ -38,9 +37,7 @@ app.use_reloader = False
 @app.route('/status/core', methods=['GET'])
 def containers_core_status():
     logger.debug(request)
-    # containers_list = get_api_healthcheck(API_CONT_HEALTH_URL)
-    # return construct_ok_response(containers_list)
-    return get_api_healthcheck(API_CONT_HEALTH_URL)
+    return get_healthcheck_from_skale_api(API_CONT_HEALTH_URL)
 
 
 if __name__ == '__main__':

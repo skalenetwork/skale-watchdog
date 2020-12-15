@@ -20,12 +20,11 @@
 import json
 import logging
 from http import HTTPStatus
-from time import sleep
 from logging import Formatter, StreamHandler
 from flask import Response
 import sys
 import requests
-from configs import API_HOST, API_PORT, API_CONT_HEALTH_URL, API_TIMEOUT
+from configs import API_HOST, API_PORT, API_TIMEOUT
 logger = logging.getLogger(__name__)
 
 
@@ -58,9 +57,9 @@ def construct_ok_response(data=None):
     return construct_response(HTTPStatus.OK, {'data': data, 'error': None})
 
 
-def get_api_healthcheck(api_url):
+def get_healthcheck_from_skale_api(api_url):
     """Return 0 if OK or 1 if failed."""
-    url = get_containers_healthcheck_url(api_url)
+    url = get_healthcheck_url(api_url)
     try:
         response = requests.get(url, timeout=API_TIMEOUT)
     except requests.exceptions.ConnectionError as err:
@@ -83,12 +82,12 @@ def get_api_healthcheck(api_url):
         return construct_err_response(HTTPStatus.BAD_GATEWAY, res['error'])
     data = res.get('data')
     if data is None:
-        err_msg = f'No data found in response checking {url}'
+        err_msg = f'No data found in response from {url}'
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
 
     return construct_ok_response(data)
 
 
-def get_containers_healthcheck_url(api_url):
+def get_healthcheck_url(api_url):
     return f'http://{API_HOST}:{API_PORT}/{api_url}'
