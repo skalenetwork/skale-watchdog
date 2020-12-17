@@ -65,26 +65,26 @@ def get_healthcheck_from_skale_api(api_url):
     except requests.exceptions.ConnectionError as err:
         err_msg = f'Could not connect to {url}'
         logger.error(f'{err_msg}. {err}')
-        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
     except Exception as err:
         err_msg = f'Could not get data from {url}'
         logger.error(f'{err_msg}. {err}')
-        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
     if response.status_code != requests.codes.ok:
         err_msg = f'Request to {url} failed, status code: {response.status_code}'
         logger.error(err_msg)
-        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
+        return construct_err_response(response.status_code, err_msg)
 
     res = response.json()
     if res.get('error') is not None:
         logger.info(res['error'])
-        return construct_err_response(HTTPStatus.BAD_GATEWAY, res['error'])
+        return construct_err_response(HTTPStatus.NOT_FOUND, res['error'])
     data = res.get('data')
     if data is None:
         err_msg = f'No data found in response from {url}'
         logger.info(err_msg)
-        return construct_err_response(HTTPStatus.BAD_GATEWAY, err_msg)
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
     return construct_ok_response(data)
 
