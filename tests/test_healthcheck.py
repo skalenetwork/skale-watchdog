@@ -19,6 +19,8 @@
 
 from unittest import mock
 import pickle
+import requests
+from http import HTTPStatus
 
 from utils.helper import get_healthcheck_from_skale_api, construct_ok_response, get_healthcheck_url
 
@@ -41,6 +43,14 @@ def mocked_requests_get(*args, **kwargs):
     return MockResponse(None, 404)
 
 
+def connection_error(*args, **kwargs):
+    raise requests.exceptions.ConnectionError
+
+
+def unknown_error(*args, **kwargs):
+    raise Exception
+
+
 @mock.patch('utils.helper.requests.get', side_effect=mocked_requests_get)
 def test_healthcheck_pos(mock_get):
     res = get_healthcheck_from_skale_api('url_ok1')
@@ -48,3 +58,21 @@ def test_healthcheck_pos(mock_get):
     assert res.status_code == expected.status_code
     assert res.response == expected.response
     assert pickle.dumps(res) == pickle.dumps(expected)
+
+
+@mock.patch('utils.helper.requests.get', side_effect=connection_error)
+def test_healthcheck_connection_error(mock_get):
+    url = 'url_ok1'
+    res = get_healthcheck_from_skale_api(url)
+    assert res.status_code == HTTPStatus.NOT_FOUND
+    res_expected = f'{{"data": null, "error": "Could not connect to {get_healthcheck_url(url)}"}}'
+    assert res.response[0].decode("utf-8") == res_expected
+
+
+@mock.patch('utils.helper.requests.get', side_effect=unknown_error)
+def test_healthcheck_unknown_error(mock_get):
+    url = 'url_ok1'
+    res = get_healthcheck_from_skale_api(url)
+    assert res.status_code == HTTPStatus.NOT_FOUND
+    res_expected = f'{{"data": null, "error": "Could not get data from {get_healthcheck_url(url)}"}}'
+    assert res.response[0].decode("utf-8") == res_expected
