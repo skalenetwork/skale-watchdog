@@ -58,7 +58,6 @@ def construct_ok_response(data=None):
 
 
 def get_healthcheck_from_skale_api(api_url):
-    """Return 0 if OK or 1 if failed."""
     url = get_healthcheck_url(api_url)
     try:
         response = requests.get(url, timeout=API_TIMEOUT)

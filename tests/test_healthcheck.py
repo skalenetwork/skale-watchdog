@@ -39,6 +39,12 @@ def mocked_requests_get(*args, **kwargs):
 
     if args[0] == get_healthcheck_url('url_ok1'):
         return MockResponse({'error': None, 'data': data_ok1}, 200)
+    elif args[0] == get_healthcheck_url('url_bad1'):
+        return MockResponse({'error': 'any_error', 'data': data_ok1}, 200)
+    elif args[0] == get_healthcheck_url('url_bad2'):
+        return MockResponse({'error': None, 'data': data_ok1}, 500)
+    elif args[0] == get_healthcheck_url('url_bad3'):
+        return MockResponse({'error': None}, 200)
 
     return MockResponse(None, 404)
 
@@ -58,6 +64,20 @@ def test_healthcheck_pos(mock_get):
     assert res.status_code == expected.status_code
     assert res.response == expected.response
     assert pickle.dumps(res) == pickle.dumps(expected)
+
+
+@mock.patch('utils.helper.requests.get', side_effect=mocked_requests_get)
+def test_healthcheck_neg(mock_get):
+    res = get_healthcheck_from_skale_api('url_bad1')
+    expected = [b'{"data": null, "error": "any_error"}']
+    assert res.response == expected
+    assert res.status_code == HTTPStatus.NOT_FOUND
+    res = get_healthcheck_from_skale_api('url_bad2')
+    assert res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+    url = 'url_bad3'
+    res = get_healthcheck_from_skale_api(url)
+    res_expected = f'{{"data": null, "error": "No data found in response from {get_healthcheck_url(url)}"}}'
+    assert res.response[0].decode("utf-8") == res_expected
 
 
 @mock.patch('utils.helper.requests.get', side_effect=connection_error)
