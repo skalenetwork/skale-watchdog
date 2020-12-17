@@ -18,7 +18,7 @@ fi
 
 if [[ $BRANCH == 'master' ]]; then
     echo $VERSION
-    exit 0
+    exit 1
 fi
 
 git fetch --tags > /dev/null
