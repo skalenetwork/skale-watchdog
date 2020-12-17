@@ -29,4 +29,7 @@ jobs:
     - name: Run tests
       run: |
         export PYTHONPATH=$PYTHONPATH:.
-        ENV=DEV py.test -v -s tests/
+        py.test -v -s --cov=./ tests/ --cov-report term-missing
+    - name: Codecov
+      run: |
+        codecov -t $CODECOV_TOKEN
