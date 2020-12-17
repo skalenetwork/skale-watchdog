@@ -20,14 +20,9 @@
 from unittest import mock
 import pickle
 
-from configs import API_HOST, API_PORT
-from utils.helper import get_healthcheck_from_skale_api, construct_ok_response
+from utils.helper import get_healthcheck_from_skale_api, construct_ok_response, get_healthcheck_url
 
 data_ok1 = [{'name': 'container_name', 'state': {'Running': True, 'Paused': False}}]
-
-
-def get_test_url(api_url):
-    return f'http://{API_HOST}:{API_PORT}/{api_url}'
 
 
 # This method will be used by the mock to replace requests.get
@@ -40,7 +35,7 @@ def mocked_requests_get(*args, **kwargs):
         def json(self):
             return self.json_data
 
-    if args[0] == get_test_url('url_ok1'):
+    if args[0] == get_healthcheck_url('url_ok1'):
         return MockResponse({'error': None, 'data': data_ok1}, 200)
 
     return MockResponse(None, 404)
