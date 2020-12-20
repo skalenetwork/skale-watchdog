@@ -20,11 +20,11 @@
 import json
 import logging
 from http import HTTPStatus
-from time import sleep
 from logging import Formatter, StreamHandler
 from flask import Response
 import sys
-
+import requests
+from configs import API_HOST, API_PORT, API_TIMEOUT
 logger = logging.getLogger(__name__)
 
 
@@ -57,34 +57,37 @@ def construct_ok_response(data=None):
     return construct_response(HTTPStatus.OK, {'data': data, 'error': None})
 
 
-def retry(exceptions, times, delay=0):
-    """
-    Retry Decorator
+def get_healthcheck_from_skale_api(api_url):
+    url = get_healthcheck_url(api_url)
+    try:
+        response = requests.get(url, timeout=API_TIMEOUT)
+    except requests.exceptions.ConnectionError as err:
+        err_msg = f'Could not connect to {url}'
+        logger.error(f'{err_msg}. {err}')
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
+    except Exception as err:
+        err_msg = f'Could not get data from {url}'
+        logger.error(f'{err_msg}. {err}')
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
-    Retries the wrapped function/method `times` times if the exceptions listed
-    in ``exceptions`` are thrown
+    if response.status_code != requests.codes.ok:
+        err_msg = f'Request to {url} failed, status code: {response.status_code}'
+        logger.error(err_msg)
+        return construct_err_response(response.status_code, err_msg)
 
-    :param Exceptions: Lists of exceptions that trigger a retry attempt
-    :type Exceptions: Tuple of Exceptions
-    :param times: The number of times to repeat the wrapped function/method
-    :type times: Int
-    :param delay: Delay between attempts in seconds. default: 0
-    :type delay: Int
-    """
-    def decorator(func):
-        def newfn(*args, **kwargs):
-            attempt = 0
-            while attempt < times:
-                try:
-                    return func(*args, **kwargs)
-                except exceptions:
-                    logger.info(
-                        'Exception thrown when attempting to run %s, attempt '
-                        '%d of %d' % (func, attempt, times),
-                        exc_info=True
-                    )
-                    attempt += 1
-                    sleep(delay)
-            return func(*args, **kwargs)
-        return newfn
-    return decorator
+    res = response.json()
+    if res.get('status') == 'error':
+        logger.error(res['payload'])
+        return construct_err_response(HTTPStatus.NOT_FOUND, res['payload'])
+    data = res.get('payload')
+
+    if data is None:
+        err_msg = f'No data found in response from {url}'
+        logger.info(err_msg)
+        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
+
+    return construct_ok_response(data)
+
+
+def get_healthcheck_url(api_url):
+    return f'http://{API_HOST}:{API_PORT}/{api_url}'
