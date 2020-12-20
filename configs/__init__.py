@@ -4,4 +4,5 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 API_HOST = 'localhost'
 API_PORT = '3007'
 API_CONT_HEALTH_URL = 'healthchecks/containers'
+API_SGX_HEALTH_URL = 'api/sgx/info'
 API_TIMEOUT = 2  # in seconds
