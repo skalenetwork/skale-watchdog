@@ -41,7 +41,7 @@ def containers_core_status():
 
 
 @app.route('/status/sgx', methods=['GET'])
-def containers_core_status():
+def sgx_status():
     logger.debug(request)
     return get_healthcheck_from_skale_api(API_SGX_HEALTH_URL)
 
