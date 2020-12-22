@@ -87,7 +87,7 @@ def get_healthcheck_from_skale_api(api_url):
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
-    if type(data) is dict and data.get('sgx_server_url'):
+    if isinstance(data, dict):
         data.pop('sgx_server_url', None)
         data.pop('sgx_keyname', None)
 
