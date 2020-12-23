@@ -79,12 +79,17 @@ def get_healthcheck_from_skale_api(api_url):
     if res.get('status') == 'error':
         logger.error(res['payload'])
         return construct_err_response(HTTPStatus.NOT_FOUND, res['payload'])
+
     data = res.get('payload')
 
     if data is None:
         err_msg = f'No data found in response from {url}'
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
+
+    if isinstance(data, dict):
+        data.pop('sgx_server_url', None)
+        data.pop('sgx_keyname', None)
 
     return construct_ok_response(data)
 
