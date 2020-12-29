@@ -66,7 +66,7 @@ def get_healthcheck_from_skale_api(api_url):
         logger.error(f'{err_msg}. {err}')
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
     except Exception as err:
-        err_msg = f'Could not get data from {url}'
+        err_msg = f'Could not get data from {url}. {err}'
         logger.error(f'{err_msg}. {err}')
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 

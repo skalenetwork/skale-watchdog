@@ -95,5 +95,5 @@ def test_healthcheck_unknown_error(mock_get):
     url = 'url_ok1'
     res = get_healthcheck_from_skale_api(url)
     assert res.status_code == HTTPStatus.NOT_FOUND
-    res_expected = f'{{"data": null, "error": "Could not get data from {get_healthcheck_url(url)}"}}'
+    res_expected = f'{{"data": null, "error": "Could not get data from {get_healthcheck_url(url)}. "}}'
     assert res.response[0].decode("utf-8") == res_expected
