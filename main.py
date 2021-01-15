@@ -23,7 +23,7 @@ from flask import Flask, request
 
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.helper import init_default_logger, get_healthcheck_from_skale_api
-from configs import API_CONT_HEALTH_URL, API_SGX_HEALTH_URL, API_SCHAINS_HEALTH_URL
+from configs import API_CONT_HEALTH_URL, API_SGX_HEALTH_URL, API_SCHAINS_HEALTH_URL, API_HARDWARE_INFO_URL
 
 init_default_logger()
 
@@ -50,6 +50,12 @@ def sgx_status():
 def schains_status():
     logger.debug(request)
     return get_healthcheck_from_skale_api(API_SCHAINS_HEALTH_URL)
+
+
+@app.route('/status/hardware', methods=['GET'])
+def hardware_status():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(API_HARDWARE_INFO_URL)
 
 
 if __name__ == '__main__':
