@@ -24,7 +24,7 @@ from logging import Formatter, StreamHandler
 from flask import Response
 import sys
 import requests
-from configs import API_HOST, API_PORT, API_TIMEOUT
+from configs import API_HOST, API_PORT, API_TIMEOUT, API_SGX_HEALTH_URL
 logger = logging.getLogger(__name__)
 
 
@@ -87,7 +87,7 @@ def get_healthcheck_from_skale_api(api_url):
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
-    if isinstance(data, dict):
+    if api_url == API_SGX_HEALTH_URL:
         data.pop('sgx_server_url', None)
         data.pop('sgx_keyname', None)
 
