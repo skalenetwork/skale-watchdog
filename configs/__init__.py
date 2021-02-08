@@ -8,4 +8,6 @@ API_SGX_HEALTH_URL = 'api/sgx/info'
 API_SCHAINS_HEALTH_URL = 'api/schains/healthchecks'
 API_HARDWARE_INFO_URL = 'hardware'
 API_ENDPOINT_INFO_URL = 'endpoint-info'
+API_SCHAIN_CONTAINERS_VERSIONS_URL = 'schain-containers-versions'
+API_META_INFO_URL = 'meta-info'
 API_TIMEOUT = 90  # in seconds
