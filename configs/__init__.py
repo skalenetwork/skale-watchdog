@@ -10,4 +10,4 @@ API_HARDWARE_INFO_URL = 'hardware'
 API_ENDPOINT_INFO_URL = 'endpoint-info'
 API_SCHAIN_CONTAINERS_VERSIONS_URL = 'schain-containers-versions'
 API_META_INFO_URL = 'meta-info'
-API_TIMEOUT = 90  # in seconds
+API_TIMEOUT = 1000  # in seconds
