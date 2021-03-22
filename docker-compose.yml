@@ -4,16 +4,19 @@ services:
   nginx:
     image: nginx:1.13.7
     container_name: skale_nginx
+    network_mode: host
     depends_on:
       - watchdog
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    ports:
-      - 3009:3009
 
   watchdog:
     container_name: skale_watchdog
-    image: skalenetwork/watchdog:latest
+    image: "skale-watchdog:local"
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
