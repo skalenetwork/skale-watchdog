@@ -17,21 +17,19 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+import sys
 import logging
-import time
-
-from uwsgidecorators import cron
-
-from utils.helper import request_all_healthchecks
-from utils.cache import get_cache
-
-logger = logging.getLogger(__name__)
-
-rcache = get_cache()
 
 
-@cron(-1, -1, -1, -1, -1)
-def cronjob(num):
-    logger.info(f'IVD HERE {int(time.time())}')
-    request_all_healthchecks(rcache)
+def init_default_logger():  # pragma: no cover
+    handlers = []
+    formatter = logging.Formatter(
+        '[%(asctime)s %(levelname)s] %(name)s:%(lineno)d - %(threadName)s - %(message)s'  # noqa
+    )
+
+    stream_handler = logging.StreamHandler(sys.stderr)
+    stream_handler.setFormatter(formatter)
+    stream_handler.setLevel(logging.INFO)
+    handlers.append(stream_handler)
+
+    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
