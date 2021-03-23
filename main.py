@@ -19,13 +19,14 @@
 
 import logging
 
-import time
 
 from flask import Flask, request
 
+import utils.background_tasks  # noqa
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.helper import init_default_logger, get_healthcheck_from_skale_api
-from conifgs import HEALTHCHECKS_ROUTES
+from utils.helper import get_healthcheck_from_skale_api, init_default_logger
+
+from configs import HEALTHCHECKS_ROUTES
 init_default_logger()
 
 logger = logging.getLogger(__name__)
@@ -69,14 +70,15 @@ def endpoint_status():
 def schain_containers_versions_status():
     logger.debug(request)
     return get_healthcheck_from_skale_api(
-        HEALTHCHECKS_ROUTES['schain-containers-versions']
+        HEALTHCHECKS_ROUTES['schain_versions']
     )
 
 
 @app.route('/status/meta-info', methods=['GET'])
 def meta_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta-info'])
+    logger.info('IVD meta request')
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta'])
 
 
 if __name__ == '__main__':

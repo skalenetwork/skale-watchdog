@@ -10,8 +10,8 @@ HEALTHCHECKS_ROUTES = {
     'schains': 'api/schains/healthchecks',
     'hardware': 'hardware',
     'endpoint': 'endpoint-info',
-    'schain_containers_versions': 'schain-containers-versions',
-    'meta_info': 'meta-info'
+    'schain_versions': 'schain-containers-versions',
+    'meta': 'meta-info'
 }
 
 API_CONT_HEALTH_URL = 'healthchecks/containers'
