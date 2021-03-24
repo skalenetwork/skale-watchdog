@@ -23,7 +23,7 @@ import time
 
 from uwsgidecorators import cron
 
-from utils.helper import request_all_healthchecks
+from utils.healthchecks import request_all_healthchecks
 from utils.cache import get_cache
 
 logger = logging.getLogger(__name__)

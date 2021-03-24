@@ -21,6 +21,7 @@ import json
 from dataclasses import dataclass
 
 from flask import Response
+from http import HTTPStatus
 
 
 @dataclass
