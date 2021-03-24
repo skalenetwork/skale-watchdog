@@ -19,19 +19,24 @@
 
 
 import logging
-import time
+from timeit import default_timer as timer
 
 from uwsgidecorators import cron
 
+from configs import CRON_SCHEDULE
 from utils.healthchecks import request_all_healthchecks
 from utils.cache import get_cache
+
 
 logger = logging.getLogger(__name__)
 
 rcache = get_cache()
 
 
-@cron(-1, -1, -1, -1, -1)
+@cron(*CRON_SCHEDULE)
 def cronjob(num):
-    logger.info(f'IVD HERE {int(time.time())}')
+    logger.info('Background job started')
+    start = timer()
     request_all_healthchecks(rcache)
+    elapsed = int(timer() - start)
+    logger.info(f'Background job finished, elapsed time {elapsed}s')

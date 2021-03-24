@@ -1,3 +1,6 @@
+import os
+
+
 LONG_LINE = '=' * 100
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -15,3 +18,7 @@ HEALTHCHECKS_ROUTES = {
 }
 
 API_TIMEOUT = 1000  # in seconds
+
+CRON_SCHEDULE = [-4, -1, -1, -1, -1]
+
+ENV = os.getenv('ENV')
