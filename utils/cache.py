@@ -52,7 +52,8 @@ class UwsgiCache(Cache):
         self.uwsgi.cache_set(url, value)
 
     def del_item(self, url):
-        self.uwsgi.cache_del(url)
+        if self.get_item(url) is not None:
+            self.uwsgi.cache_del(url)
 
 
 class MemoryCache(Cache):
@@ -66,7 +67,8 @@ class MemoryCache(Cache):
         self.cache[url] = value
 
     def del_item(self, url):
-        del self.cache[url]
+        if url in self.cache:
+            del self.cache[url]
 
 
 def init_cache():
