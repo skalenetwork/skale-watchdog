@@ -24,7 +24,8 @@ from flask import Flask, request
 
 import utils.background_tasks  # noqa
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.helper import get_healthcheck_from_skale_api, init_default_logger
+from utils.healthchecks import get_healthcheck_from_skale_api
+from utils.log import init_default_logger
 
 from configs import HEALTHCHECKS_ROUTES
 init_default_logger()
