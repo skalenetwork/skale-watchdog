@@ -35,6 +35,10 @@ class Cache(metaclass=ABCMeta):
     def set_item(self, url, value):
         pass
 
+    @abstractmethod
+    def del_item(self, url):
+        pass
+
 
 class UwsgiCache(Cache):
     def __init__(self):
@@ -47,6 +51,9 @@ class UwsgiCache(Cache):
     def set_item(self, url, value):
         self.uwsgi.cache_set(url, value)
 
+    def del_item(self, url):
+        self.uwsgi.cache_del(url)
+
 
 class MemoryCache(Cache):
     def __init__(self):
@@ -55,8 +62,11 @@ class MemoryCache(Cache):
     def get_item(self, url):
         return self.cache.get(url)
 
-    def save_item(self, url, value):
+    def set_item(self, url, value):
         self.cache[url] = value
+
+    def del_item(self, url):
+        del self.cache[url]
 
 
 def init_cache():
