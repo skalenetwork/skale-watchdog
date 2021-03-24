@@ -19,24 +19,25 @@
 
 import importlib
 import logging
-import os
 
 from abc import ABCMeta, abstractmethod
+
+from configs import ENV
 
 logger = logging.getLogger(__name__)
 
 
 class Cache(metaclass=ABCMeta):
     @abstractmethod
-    def get_item(self, url):
+    def get_item(self, route):
         pass
 
     @abstractmethod
-    def set_item(self, url, value):
+    def set_item(self, route, value):
         pass
 
     @abstractmethod
-    def del_item(self, url):
+    def del_item(self, route):
         pass
 
 
@@ -44,35 +45,35 @@ class UwsgiCache(Cache):
     def __init__(self):
         self.uwsgi = importlib.import_module('uwsgi')
 
-    def get_item(self, url):
-        logger.debug(f'Retrieving {url} request result from cache')
-        return self.uwsgi.cache_get(url)
+    def get_item(self, route):
+        logger.debug(f'Retrieving {route} request result from cache')
+        return self.uwsgi.cache_get(route)
 
-    def set_item(self, url, value):
-        self.uwsgi.cache_set(url, value)
+    def set_item(self, route, value):
+        self.uwsgi.cache_set(route, value)
 
-    def del_item(self, url):
-        if self.get_item(url) is not None:
-            self.uwsgi.cache_del(url)
+    def del_item(self, route):
+        if self.get_item(route) is not None:
+            self.uwsgi.cache_del(route)
 
 
 class MemoryCache(Cache):
     def __init__(self):
         self.cache = {}
 
-    def get_item(self, url):
-        return self.cache.get(url)
+    def get_item(self, route):
+        return self.cache.get(route)
 
-    def set_item(self, url, value):
-        self.cache[url] = value
+    def set_item(self, route, value):
+        self.cache[route] = value
 
-    def del_item(self, url):
-        if url in self.cache:
-            del self.cache[url]
+    def del_item(self, route):
+        if route in self.cache:
+            del self.cache[route]
 
 
 def init_cache():
-    if os.getenv('ENV') == 'dev':
+    if ENV == 'dev':
         return MemoryCache()
     else:
         return UwsgiCache()
