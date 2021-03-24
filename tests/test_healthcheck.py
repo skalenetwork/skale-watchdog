@@ -17,14 +17,25 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from unittest import mock
 import pickle
 import requests
 from http import HTTPStatus
+from unittest import mock
+from configs import HEALTHCHECKS_ROUTES
 
-from utils.helper import get_healthcheck_from_skale_api, construct_ok_response, get_healthcheck_url
+from utils.healthchecks import (
+    get_healthcheck_from_skale_api,
+    get_healthcheck_url,
+    request_all_healthchecks
+)
+from utils.cache import get_cache
+from utils.structures import construct_ok_response
 
-data_ok1 = [{'name': 'container_name', 'state': {'Running': True, 'Paused': False}}]
+data_ok1 = {
+    'name': 'container_name',
+    'state': {'Running': True, 'Paused': False},
+    'sgx_keyname': 'test-keyname', 'sgx_server_url': 'test-url'
+}
 
 
 # This method will be used by the mock to replace requests.get
@@ -37,7 +48,7 @@ def mocked_requests_get(*args, **kwargs):
         def json(self):
             return self.json_data
 
-    if args[0] == get_healthcheck_url('url_ok1'):
+    if args[0] == get_healthcheck_url(HEALTHCHECKS_ROUTES['sgx']):
         return MockResponse({'status': 'ok', 'payload': data_ok1}, 200)
     elif args[0] == get_healthcheck_url('url_bad1'):
         return MockResponse({'status': 'error', 'payload': 'any_error'}, 200)
@@ -57,20 +68,20 @@ def unknown_error(*args, **kwargs):
     raise Exception
 
 
-@mock.patch('utils.helper.requests.get', side_effect=mocked_requests_get)
+@mock.patch('utils.healthchecks.requests.get', side_effect=mocked_requests_get)
 def test_healthcheck_pos(mock_get):
-    res = get_healthcheck_from_skale_api('url_ok1')
-    expected = construct_ok_response(data_ok1)
+    route = HEALTHCHECKS_ROUTES['sgx']
+    res = get_healthcheck_from_skale_api(route)
+    expected = construct_ok_response(data_ok1).to_flask_response()
     assert res.status_code == expected.status_code
     assert res.response == expected.response
     assert pickle.dumps(res) == pickle.dumps(expected)
 
 
-@mock.patch('utils.helper.requests.get', side_effect=mocked_requests_get)
+@mock.patch('utils.healthchecks.requests.get', side_effect=mocked_requests_get)
 def test_healthcheck_neg(mock_get):
     res = get_healthcheck_from_skale_api('url_bad1')
     expected = [b'{"data": null, "error": "any_error"}']
-    print(f'WWWWWWWWWWW: {res.response}')
     assert res.response == expected
     assert res.status_code == HTTPStatus.NOT_FOUND
     res = get_healthcheck_from_skale_api('url_bad2')
@@ -81,7 +92,7 @@ def test_healthcheck_neg(mock_get):
     assert res.response[0].decode("utf-8") == res_expected
 
 
-@mock.patch('utils.helper.requests.get', side_effect=connection_error)
+@mock.patch('utils.healthchecks.requests.get', side_effect=connection_error)
 def test_healthcheck_connection_error(mock_get):
     url = 'url_ok1'
     res = get_healthcheck_from_skale_api(url)
@@ -90,10 +101,15 @@ def test_healthcheck_connection_error(mock_get):
     assert res.response[0].decode("utf-8") == res_expected
 
 
-@mock.patch('utils.helper.requests.get', side_effect=unknown_error)
+@mock.patch('utils.healthchecks.requests.get', side_effect=unknown_error)
 def test_healthcheck_unknown_error(mock_get):
     url = 'url_ok1'
     res = get_healthcheck_from_skale_api(url)
     assert res.status_code == HTTPStatus.NOT_FOUND
     res_expected = f'{{"data": null, "error": "Could not get data from {get_healthcheck_url(url)}. "}}'
     assert res.response[0].decode("utf-8") == res_expected
+
+
+def test_request_all_healthchecks():
+    rcache = get_cache()
+    request_all_healthchecks(rcache)
