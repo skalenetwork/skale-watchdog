@@ -19,6 +19,6 @@ HEALTHCHECKS_ROUTES = {
 
 API_TIMEOUT = 1000  # in seconds
 
-CRON_SCHEDULE = [-4, -1, -1, -1, -1]
+CRON_SCHEDULE = [-4, -1, -1, -1, -1]  # Every 4 minutes
 
 ENV = os.getenv('ENV')

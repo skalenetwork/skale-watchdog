@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+from concurrent.futures import as_completed, ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from multiprocessing import Process
 from timeit import default_timer as timer
@@ -11,7 +12,8 @@ import pytest
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
-COLD_START_TIMEOUT = 20
+COLD_START_TIMEOUT = 300
+MAX_WORKERS = 50
 
 thread_running = True
 
@@ -21,7 +23,7 @@ def compose_watchdog_url(host=BASE_HOST, port=WATCHDOG_PORT, route=''):
 
 
 class RequestsHandler(BaseHTTPRequestHandler):
-    REQUEST_SLEEP = 20
+    REQUEST_SLEEP = 10
 
     def _set_headers(self, code=200):
         self.send_response(code)
@@ -59,30 +61,51 @@ def skale_api_success():
     p.terminate()
 
 
+def run_request_concurrently(route):
+    good_url = compose_watchdog_url(route='/status/sgx')
+    futures = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
+        futures.append(e.submit(requests.get, good_url, timeout=60))
+
+    results = [
+        future.result() for future in as_completed(futures)
+    ]
+    return results
+
+
 def test_successfull_request(skale_api_success):
     good_url = compose_watchdog_url(route='/status/sgx')
 
     start_ts = timer()
-    response = requests.get(good_url)
-    diff = timer() - start_ts
+    response = requests.get(good_url, timeout=60)
+    ts_diff = timer() - start_ts
 
     data = response.json()
     assert data == {'data': {'sgx': 'ok'}, 'error': None}
 
-    assert diff < 2
+    assert ts_diff < 2
 
 
 def test_unsuccessfull_request(skale_api_success):
-    good_url = compose_watchdog_url(route='/status/meta-info')
+    bad_url = compose_watchdog_url(route='/status/meta-info')
 
     start_ts = timer()
-    response = requests.get(good_url)
-    diff = timer() - start_ts
+    response = requests.get(bad_url, timeout=60)
+    ts_diff = timer() - start_ts
 
     data = response.json()
-    print(data)
-    assert data == {'data': {'sgx': 'ok'}, 'error': None}
-    assert diff >= RequestsHandler.REQUEST_SLEEP
+    assert data == {'data': None, 'error': 'Request to http://localhost:3007/meta-info failed, status code: 400'}  # noqa
+    assert ts_diff >= RequestsHandler.REQUEST_SLEEP
+
+
+def test_concurrent_request():
+    start_ts = timer()
+    result = run_request_concurrently(route='/status/sgx')
+    ts_diff = timer() - start_ts
+    for r in result:
+        data = r.json()
+        assert data == {'data': {'sgx': 'ok'}, 'error': None}
+    assert ts_diff < 2
 
 
 if __name__ == '__main__':
