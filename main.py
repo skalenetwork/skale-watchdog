@@ -78,7 +78,6 @@ def schain_containers_versions_status():
 @app.route('/status/meta-info', methods=['GET'])
 def meta_status():
     logger.debug(request)
-    logger.info('IVD meta request')
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta'])
 
 

@@ -46,14 +46,17 @@ class UwsgiCache(Cache):
         self.uwsgi = importlib.import_module('uwsgi')
 
     def get_item(self, route):
-        logger.debug(f'Retrieving {route} request result from cache')
+        logger.debug(f'Retrieving {route} request result from the cache')
         return self.uwsgi.cache_get(route)
 
     def set_item(self, route, value):
+        logger.debug(f'Saving {route} request result from the cache')
         self.uwsgi.cache_set(route, value)
 
     def del_item(self, route):
+        logger.debug(f'Trying to delete {route} request result from the cache')
         if self.get_item(route) is not None:
+            logger.debug(f'Deleting {route} request result from the cache')
             self.uwsgi.cache_del(route)
 
 

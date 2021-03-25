@@ -40,9 +40,7 @@ def get_healthcheck_from_skale_api(route, rcache=None):
     cached_response = SkaleApiResponse.from_bytes(
         rcache.get_item(route)
     )
-    logger.info(f'IVD cached_response test {route} {cached_response}')
     response = cached_response or request_healthcheck_from_skale_api(route)
-    logger.info(f'IVD response test {response.to_json()}')
     return response.to_flask_response()
 
 
@@ -96,13 +94,12 @@ def healthcheck_urls_from_routes():
 
 def request_all_healthchecks(rcache=None):
     rcache = rcache or get_cache()
-    logger.info('Requesting and saving data from all endpoints')
+    logger.info('Requesting and caching data from endpoints')
     for route, url in healthcheck_urls_from_routes():
         response = request_healthcheck_from_skale_api(route)
         logger.info(
-            f'IVD response during after fetching {url} {response.to_json()}')
+            f'{url} request returned {response.code} status code')
         if response.code == HTTPStatus.OK:
-            logger.info(f'IVD saving {response} to {route} key')
             rcache.set_item(route, response.to_bytes())
         else:
             rcache.del_item(route)
