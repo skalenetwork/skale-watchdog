@@ -101,8 +101,6 @@ def request_all_healthchecks(rcache=None):
         response = request_healthcheck_from_skale_api(route)
         logger.info(
             f'IVD response during after fetching {url} {response.to_json()}')
-        logger.info(
-            f'IVD HERE {response.code} - {HTTPStatus.OK} - {(response.code == HTTPStatus.OK)} - {type(HTTPStatus.OK)}')
         if response.code == HTTPStatus.OK:
             logger.info(f'IVD saving {response} to {route} key')
             rcache.set_item(route, response.to_bytes())
