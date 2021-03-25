@@ -44,7 +44,7 @@ class SkaleApiResponse:
             return None
         deserialized = json.loads(json_data)
         return cls(
-            code=deserialized['code'],
+            code=HTTPStatus(deserialized['code']),
             data=deserialized['data'],
         )
 
