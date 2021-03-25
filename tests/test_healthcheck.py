@@ -134,6 +134,7 @@ def test_healthcheck_unknown_error(mock_get):
     assert res.response[0].decode("utf-8") == res_expected
 
 
-def test_request_all_healthchecks():
+@mock.patch('utils.healthchecks.requests.get', side_effect=mocked_requests_get)
+def test_request_all_healthchecks(mock_get):
     rcache = get_cache()
     request_all_healthchecks(rcache)
