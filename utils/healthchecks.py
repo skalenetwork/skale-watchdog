@@ -99,7 +99,4 @@ def request_all_healthchecks(rcache=None):
         response = request_healthcheck_from_skale_api(route)
         logger.info(
             f'{url} request returned {response.code} status code')
-        if response.code == HTTPStatus.OK:
-            rcache.set_item(route, response.to_bytes())
-        else:
-            rcache.del_item(route)
+        rcache.set_item(route, response.to_bytes())
