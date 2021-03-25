@@ -17,6 +17,7 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import pickle
 import requests
 from http import HTTPStatus
@@ -71,6 +72,29 @@ def unknown_error(*args, **kwargs):
 @mock.patch('utils.healthchecks.requests.get', side_effect=mocked_requests_get)
 def test_healthcheck_pos(mock_get):
     route = HEALTHCHECKS_ROUTES['sgx']
+    # Check with cold cache
+    res = get_healthcheck_from_skale_api(route)
+    expected = construct_ok_response(data_ok1).to_flask_response()
+    assert res.status_code == expected.status_code
+    assert res.response == expected.response
+    assert pickle.dumps(res) == pickle.dumps(expected)
+
+    # Check using cached data
+    cache = get_cache()
+    cache.set_item(
+        HEALTHCHECKS_ROUTES['sgx'],
+        json.dumps(
+            {
+                'code': HTTPStatus.OK,
+                'data': {
+                    'data': {
+                        **data_ok1
+                    },
+                    'error': None
+                }
+            }
+        ).encode('utf-8')
+    )
     res = get_healthcheck_from_skale_api(route)
     expected = construct_ok_response(data_ok1).to_flask_response()
     assert res.status_code == expected.status_code
