@@ -1,13 +1,24 @@
+import os
+
+
 LONG_LINE = '=' * 100
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 API_HOST = 'localhost'
 API_PORT = '3007'
-API_CONT_HEALTH_URL = 'healthchecks/containers'
-API_SGX_HEALTH_URL = 'api/sgx/info'
-API_SCHAINS_HEALTH_URL = 'api/schains/healthchecks'
-API_HARDWARE_INFO_URL = 'hardware'
-API_ENDPOINT_INFO_URL = 'endpoint-info'
-API_SCHAIN_CONTAINERS_VERSIONS_URL = 'schain-containers-versions'
-API_META_INFO_URL = 'meta-info'
+
+HEALTHCHECKS_ROUTES = {
+    'containers': 'healthchecks/containers',
+    'sgx': 'api/sgx/info',
+    'schains': 'api/schains/healthchecks',
+    'hardware': 'hardware',
+    'endpoint': 'endpoint-info',
+    'schain_versions': 'schain-containers-versions',
+    'meta': 'meta-info'
+}
+
 API_TIMEOUT = 1000  # in seconds
+
+CRON_SCHEDULE = [-4, -1, -1, -1, -1]  # Every 4 minutes
+
+ENV = os.getenv('ENV')

@@ -2,7 +2,7 @@
 #
 #   This file is part of SKALE Containers Watchdog
 #
-#   Copyright (C) 2020 SKALE Labs
+#   Copyright (C) 2020-Present SKALE Labs
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as published by
@@ -17,48 +17,36 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import logging
-from http import HTTPStatus
-from logging import Formatter, StreamHandler
-from flask import Response
-import sys
 import requests
-from configs import API_HOST, API_PORT, API_TIMEOUT, API_SGX_HEALTH_URL
+from http import HTTPStatus
+
+from configs import (
+    API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECKS_ROUTES
+)
+from utils.cache import get_cache
+from utils.structures import (
+    construct_err_response,
+    construct_ok_response,
+    SkaleApiResponse
+)
+
+
 logger = logging.getLogger(__name__)
 
 
-def init_default_logger():  # pragma: no cover
-    handlers = []
-    formatter = Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    stream_handler = StreamHandler(sys.stderr)
-    stream_handler.setFormatter(formatter)
-    stream_handler.setLevel(logging.INFO)
-    handlers.append(stream_handler)
-
-    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
-
-
-def construct_response(status, data):
-    return Response(
-        response=json.dumps(data),
-        status=status,
-        mimetype='application/json'
+def get_healthcheck_from_skale_api(route, rcache=None):
+    rcache = rcache or get_cache()
+    cached_response = SkaleApiResponse.from_bytes(
+        rcache.get_item(route)
     )
+    response = cached_response or request_healthcheck_from_skale_api(route)
+    return response.to_flask_response()
 
 
-def construct_err_response(status, err):
-    return construct_response(status, {'data': None, 'error': str(err)})
-
-
-def construct_ok_response(data=None):
-    return construct_response(HTTPStatus.OK, {'data': data, 'error': None})
-
-
-def get_healthcheck_from_skale_api(api_url):
-    url = get_healthcheck_url(api_url)
+def request_healthcheck_from_skale_api(route):
+    url = get_healthcheck_url(route)
+    logger.info(f'Requesting data from {url}')
     try:
         response = requests.get(url, timeout=API_TIMEOUT)
     except requests.exceptions.ConnectionError as err:
@@ -87,12 +75,28 @@ def get_healthcheck_from_skale_api(api_url):
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
 
-    if api_url == API_SGX_HEALTH_URL:
-        data.pop('sgx_server_url', None)
+    if route == HEALTHCHECKS_ROUTES['sgx']:
         data.pop('sgx_keyname', None)
+        data.pop('sgx_server_url', None)
 
     return construct_ok_response(data)
 
 
-def get_healthcheck_url(api_url):
-    return f'http://{API_HOST}:{API_PORT}/{api_url}'
+def get_healthcheck_url(route):
+    return f'http://{API_HOST}:{API_PORT}/{route}'
+
+
+def healthcheck_urls_from_routes():
+    return map(
+        lambda r: (r, get_healthcheck_url(r)), HEALTHCHECKS_ROUTES.values()
+    )
+
+
+def request_all_healthchecks(rcache=None):
+    rcache = rcache or get_cache()
+    logger.info('Requesting and caching data from endpoints')
+    for route, url in healthcheck_urls_from_routes():
+        response = request_healthcheck_from_skale_api(route)
+        logger.info(
+            f'{url} request returned {response.code} status code')
+        rcache.set_item(route, response.to_bytes())

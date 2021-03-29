@@ -27,10 +27,15 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install codecov pytest-cov
-    - name: Run tests
+    - name: Lint with flake8
       run: |
-        export PYTHONPATH=$PYTHONPATH:.
-        py.test -v -s --cov=./ tests/ --cov-report term-missing
+        flake8 .
+    - name: Run unit tests
+      run: |
+        scripts/run_unit_tests.sh
+    - name: Run comprehensive test
+      run: |
+        scripts/run_comprehensive_test.sh
     - name: Codecov
       run: |
         codecov -t $CODECOV_TOKEN

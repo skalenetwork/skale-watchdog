@@ -17,8 +17,26 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 
-FLASK_APP_HOST = os.environ['FLASK_APP_HOST']
-FLASK_APP_PORT = int(os.environ['FLASK_APP_PORT'])
-FLASK_DEBUG_MODE = os.environ['FLASK_DEBUG_MODE'] == 'True'
+import logging
+from timeit import default_timer as timer
+
+from uwsgidecorators import cron
+
+from configs import CRON_SCHEDULE
+from utils.healthchecks import request_all_healthchecks
+from utils.cache import get_cache
+
+
+logger = logging.getLogger(__name__)
+
+rcache = get_cache()
+
+
+@cron(*CRON_SCHEDULE)
+def cronjob(num):
+    logger.info('Background job started')
+    start = timer()
+    request_all_healthchecks(rcache)
+    elapsed = int(timer() - start)
+    logger.info(f'Background job finished, elapsed time {elapsed}s')
