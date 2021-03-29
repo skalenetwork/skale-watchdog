@@ -2,7 +2,7 @@
 #
 #   This file is part of SKALE Containers Watchdog
 #
-#   Copyright (C) 2020 SKALE Labs
+#   Copyright (C) 2020-Present SKALE Labs
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU Affero General Public License as published by
@@ -29,7 +29,6 @@ def init_default_logger():  # pragma: no cover
 
     stream_handler = logging.StreamHandler(sys.stderr)
     stream_handler.setFormatter(formatter)
-    stream_handler.setLevel(logging.INFO)
+    stream_handler.setLevel(logging.DEBUG)
     handlers.append(stream_handler)
-
     logging.basicConfig(level=logging.DEBUG, handlers=handlers)
