@@ -41,6 +41,10 @@ def get_healthcheck_from_skale_api(route, rcache=None):
         rcache.get_item(route)
     )
     response = cached_response or request_healthcheck_from_skale_api(route)
+    if cached_response:
+        logger.info(f'Cached data for {route}: {response}')
+    else:
+        logger.info(f'Cached data for {route}: {response}')
     return response.to_flask_response()
 
 
@@ -73,7 +77,7 @@ def request_healthcheck_from_skale_api(route):
     if data is None:
         err_msg = f'No data found in response from {url}'
         logger.info(err_msg)
-        return construct_err_response(HTTPStatus.NOT_FOUND, err_msg)
+        return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
     if route == HEALTHCHECKS_ROUTES['sgx']:
         data.pop('sgx_keyname', None)
