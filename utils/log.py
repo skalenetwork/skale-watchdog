@@ -17,15 +17,45 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
+import re
 import sys
 import logging
 
 
+HIDING_PATTERNS = [
+    r'NEK\:\w+',
+    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
+    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+]
+
+
+class HidingFormatter:
+    def __init__(self, base_formatter, patterns):
+        self.base_formatter = base_formatter
+        self._patterns = patterns
+
+    @classmethod
+    def convert_match_to_sha3(cls, match):
+        return hashlib.sha3_256(match.group(0).encode('utf-8')).digest().hex()
+
+    def format(self, record):
+        msg = self.base_formatter.format(record)
+        for pattern in self._patterns:
+            pat = re.compile(pattern)
+            msg = pat.sub(self.convert_match_to_sha3, msg)
+        return msg
+
+    def __getattr__(self, attr):
+        return getattr(self.base_formatter, attr)
+
+
 def init_default_logger():  # pragma: no cover
     handlers = []
-    formatter = logging.Formatter(
+    base_formatter = logging.Formatter(
         '[%(asctime)s %(levelname)s] %(name)s:%(lineno)d - %(threadName)s - %(message)s'  # noqa
     )
+    formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
 
     stream_handler = logging.StreamHandler(sys.stderr)
     stream_handler.setFormatter(formatter)
