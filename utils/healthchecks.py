@@ -42,9 +42,9 @@ def get_healthcheck_from_skale_api(route, rcache=None):
     )
     response = cached_response or request_healthcheck_from_skale_api(route)
     if cached_response:
-        logger.info(f'Cached data for {route}: {response}')
+        logger.info(f'Cached response for {route}: {response}')
     else:
-        logger.info(f'Cached data for {route}: {response}')
+        logger.info(f'Cold response for {route}: {response}')
     return response.to_flask_response()
 
 
@@ -63,7 +63,7 @@ def request_healthcheck_from_skale_api(route):
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
     if response.status_code != requests.codes.ok:
-        err_msg = f'Request to {url} failed, status code: {response.status_code}'
+        err_msg = f'Request to {url} failed, code: {response.status_code}'
         logger.error(err_msg)
         return construct_err_response(response.status_code, err_msg)
 
