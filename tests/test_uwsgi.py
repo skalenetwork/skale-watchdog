@@ -94,7 +94,7 @@ def test_unsuccessfull_request(skale_api_success):
     ts_diff = timer() - start_ts
 
     data = response.json()
-    assert data == {'data': None, 'error': 'Request to http://localhost:3007/meta-info failed, status code: 400'}  # noqa
+    assert data == {'data': None, 'error': 'Request to http://localhost:3007/meta-info failed, code: 400'}  # noqa
     assert ts_diff < 2
 
 
