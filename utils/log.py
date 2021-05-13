@@ -55,10 +55,10 @@ def init_default_logger():  # pragma: no cover
     base_formatter = logging.Formatter(
         '[%(asctime)s %(levelname)s] %(name)s:%(lineno)d - %(threadName)s - %(message)s'  # noqa
     )
-    formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
+    # formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
 
     stream_handler = logging.StreamHandler(sys.stderr)
-    stream_handler.setFormatter(formatter)
+    stream_handler.setFormatter(base_formatter)
     stream_handler.setLevel(logging.DEBUG)
     handlers.append(stream_handler)
     logging.basicConfig(level=logging.DEBUG, handlers=handlers)

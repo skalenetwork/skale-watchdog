@@ -102,5 +102,6 @@ def request_all_healthchecks(rcache=None):
     for route, url in healthcheck_urls_from_routes():
         response = request_healthcheck_from_skale_api(route)
         logger.info(
-            f'{url} request returned {response.code} status code')
+            f'{url} request returned {response.code} status code, '
+            f'response: {response}')
         rcache.set_item(route, response.to_bytes())
