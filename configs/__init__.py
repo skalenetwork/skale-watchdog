@@ -14,7 +14,8 @@ HEALTHCHECKS_ROUTES = {
     'hardware': 'hardware',
     'endpoint': 'endpoint-info',
     'schain_versions': 'schain-containers-versions',
-    'meta': 'meta-info'
+    'meta': 'meta-info',
+    'ssl': 'api/ssl/status'
 }
 
 API_TIMEOUT = 1000  # in seconds
