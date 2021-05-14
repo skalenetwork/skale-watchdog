@@ -12,7 +12,7 @@ import pytest
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
-COLD_START_TIMEOUT = 300
+COLD_START_TIMEOUT = 200
 MAX_WORKERS = 50
 
 thread_running = True
@@ -160,7 +160,7 @@ def test_changing_status_request(skale_api_success):
 
     data = response.json()
     assert ts_diff < 2
-    assert data == {'error': 'Request to http://localhost:3007/endpoint-info failed, code: 400'}  # noqa
+    assert data == {'error':  'Request to endpoint-info failed, code: 400'}  # noqa
 
 
 def test_concurrent_request():
