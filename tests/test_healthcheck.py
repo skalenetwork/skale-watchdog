@@ -110,27 +110,27 @@ def test_healthcheck_neg(mock_get):
     assert res.status_code == HTTPStatus.BAD_REQUEST
     res = get_healthcheck_from_skale_api('url_bad2')
     assert res.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-    url = 'url_bad3'
-    res = get_healthcheck_from_skale_api(url)
-    res_expected = f'{{"data": null, "error": "No data found in response from {get_healthcheck_url(url)}"}}'  # noqa
+    route = 'url_bad3'
+    res = get_healthcheck_from_skale_api(route)
+    res_expected = f'{{"data": null, "error": "No data found in response from {route}"}}'  # noqa
     assert res.response[0].decode("utf-8") == res_expected
 
 
 @mock.patch('utils.healthchecks.requests.get', side_effect=connection_error)
 def test_healthcheck_connection_error(mock_get):
-    url = 'url_ok1'
-    res = get_healthcheck_from_skale_api(url)
+    route = 'url_ok1'
+    res = get_healthcheck_from_skale_api(route)
     assert res.status_code == HTTPStatus.BAD_REQUEST
-    res_expected = f'{{"data": null, "error": "Could not connect to {get_healthcheck_url(url)}"}}'  # noqa
+    res_expected = f'{{"data": null, "error": "Could not connect to {route}"}}'  # noqa
     assert res.response[0].decode("utf-8") == res_expected
 
 
 @mock.patch('utils.healthchecks.requests.get', side_effect=unknown_error)
 def test_healthcheck_unknown_error(mock_get):
-    url = 'url_ok1'
-    res = get_healthcheck_from_skale_api(url)
+    route = 'url_ok1'
+    res = get_healthcheck_from_skale_api(route)
     assert res.status_code == HTTPStatus.BAD_REQUEST
-    res_expected = f'{{"data": null, "error": "Could not get data from {get_healthcheck_url(url)}. "}}'  # noqa
+    res_expected = f'{{"data": null, "error": "Could not get data from {route}. "}}'  # noqa
     assert res.response[0].decode("utf-8") == res_expected
 
 
