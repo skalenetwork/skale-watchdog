@@ -42,28 +42,30 @@ def get_healthcheck_from_skale_api(route, rcache=None):
     )
     response = cached_response or request_healthcheck_from_skale_api(route)
     if cached_response:
-        logger.info(f'Cached response for {route}: {response}')
+        logger.info(f'Cached response for {route} founded')
+        logger.debug(f'Cached response for {route}: {response}')
     else:
-        logger.info(f'Cold response for {route}: {response}')
+        logger.info(f'No cached response founded for {route}')
+        logger.debug(f'Cold response for {route}: {response}')
     return response.to_flask_response()
 
 
-def request_healthcheck_from_skale_api(route):
+def request_healthcheck_from_skale_api(route, mode='direct'):
     url = get_healthcheck_url(route)
-    logger.info(f'Requesting data from {url}')
+    logger.info(f'Requesting data from {url}, mode: {mode}')
     try:
         response = requests.get(url, timeout=API_TIMEOUT)
     except requests.exceptions.ConnectionError as err:
-        err_msg = f'Could not connect to {url}'
+        err_msg = f'Could not connect to {route}'
         logger.error(f'{err_msg}. {err}')
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
     except Exception as err:
-        err_msg = f'Could not get data from {url}. {err}'
+        err_msg = f'Could not get data from {route}. {err}'
         logger.error(f'{err_msg}. {err}')
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
     if response.status_code != requests.codes.ok:
-        err_msg = f'Request to {url} failed, code: {response.status_code}'
+        err_msg = f'Request to {route} failed, code: {response.status_code}'
         logger.error(err_msg)
         return construct_err_response(response.status_code, err_msg)
 
@@ -75,7 +77,7 @@ def request_healthcheck_from_skale_api(route):
     data = res.get('payload')
 
     if data is None:
-        err_msg = f'No data found in response from {url}'
+        err_msg = f'No data found in response from {route}'
         logger.info(err_msg)
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
@@ -100,8 +102,10 @@ def request_all_healthchecks(rcache=None):
     rcache = rcache or get_cache()
     logger.info('Requesting and caching data from endpoints')
     for route, url in healthcheck_urls_from_routes():
-        response = request_healthcheck_from_skale_api(route)
+        response = request_healthcheck_from_skale_api(route, mode='background')
         logger.info(
-            f'{url} request returned {response.code} status code, '
-            f'response: {response}')
-        rcache.set_item(route, response.to_bytes())
+            f'{route} request returned {response.code} code. Saving to cache')
+        logger.debug(
+            f'{route} request returned {response.code} status code, '
+            f'response: {response}. Saving to cache')
+        rcache.update_item(route, response.to_bytes())

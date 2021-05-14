@@ -24,6 +24,8 @@ def compose_watchdog_url(host=BASE_HOST, port=WATCHDOG_PORT, route=''):
 
 class RequestsHandler(BaseHTTPRequestHandler):
     REQUEST_SLEEP = 10
+    schains_req_cnt = 0
+    endpoint_req_cnt = 0
 
     def _set_headers(self, code=200):
         self.send_response(code)
@@ -39,6 +41,23 @@ class RequestsHandler(BaseHTTPRequestHandler):
         if self.path == '/api/sgx/info':
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
+        elif self.path == '/api/schains/healthchecks':
+            self._set_headers(code=200)
+            if RequestsHandler.schains_req_cnt % 4 == 1:
+                response = {'status': 'ok', 'payload': {'schains': False}}
+            else:
+                response = {'status': 'ok', 'payload': {'schains': True}}
+            RequestsHandler.schains_req_cnt += 1
+        elif self.path == '/endpoint-info':
+            if RequestsHandler.endpoint_req_cnt % 4 == 1:
+                self._set_headers(code=400)
+                response = {'status': 'error',
+                            'payload': {'endpoint': 'error'}}
+            else:
+                self._set_headers(code=200)
+                response = {'status': 'ok', 'payload': {'endpoint': True}}
+            RequestsHandler.endpoint_req_cnt += 1
+
         else:
             self._set_headers(code=400)
             response = {'status': 'error', 'payload': {'sgx': 'error'}}
@@ -96,6 +115,52 @@ def test_unsuccessfull_request(skale_api_success):
     data = response.json()
     assert data == {'data': None, 'error': 'Request to http://localhost:3007/meta-info failed, code: 400'}  # noqa
     assert ts_diff < 2
+
+
+def test_changing_request(skale_api_success):
+    changing_url = compose_watchdog_url(route='/status/schains')
+
+    start_ts = timer()
+    response = requests.get(changing_url, timeout=60)
+    ts_diff = timer() - start_ts
+
+    data = response.json()
+    assert ts_diff < 2
+    assert data == {'data': {'schains': False}, 'error': None}
+
+    # sleep to make sure status is changed
+    time.sleep(220)
+
+    start_ts = timer()
+    response = requests.get(changing_url, timeout=60)
+    ts_diff = timer() - start_ts
+
+    data = response.json()
+    assert ts_diff < 2
+    assert data == {'data': {'schains': True}, 'error': None}
+
+
+def test_changing_status_request(skale_api_success):
+    changing_url = compose_watchdog_url(route='/status/endpoint')
+
+    start_ts = timer()
+    response = requests.get(changing_url, timeout=60)
+    ts_diff = timer() - start_ts
+
+    data = response.json()
+    assert ts_diff < 2
+    assert data == {'data': {'endpoint': True}, 'error': None}
+
+    # sleep to make sure status is changed
+    time.sleep(220)
+
+    start_ts = timer()
+    response = requests.get(changing_url, timeout=60)
+    ts_diff = timer() - start_ts
+
+    data = response.json()
+    assert ts_diff < 2
+    assert data == {'error': 'Request to http://localhost:3007/endpoint-info failed, code: 400'}  # noqa
 
 
 def test_concurrent_request():

@@ -81,7 +81,7 @@ def test_healthcheck_pos(mock_get):
 
     # Check using cached data
     cache = get_cache()
-    cache.set_item(
+    cache.update_item(
         HEALTHCHECKS_ROUTES['sgx'],
         json.dumps(
             {
@@ -121,7 +121,7 @@ def test_healthcheck_connection_error(mock_get):
     url = 'url_ok1'
     res = get_healthcheck_from_skale_api(url)
     assert res.status_code == HTTPStatus.BAD_REQUEST
-    res_expected = f'{{"data": null, "error": "Could not connect to {get_healthcheck_url(url)}"}}'
+    res_expected = f'{{"data": null, "error": "Could not connect to {get_healthcheck_url(url)}"}}'  # noqa
     assert res.response[0].decode("utf-8") == res_expected
 
 
