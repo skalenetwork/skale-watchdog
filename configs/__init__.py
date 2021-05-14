@@ -7,7 +7,7 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 API_HOST = 'localhost'
 API_PORT = '3007'
 
-API_PREFIX = '/api'
+API_PREFIX = 'api'
 CURRENT_API_VERSION = 'v1'
 API_VERSION_PREFIX = os.path.join(API_PREFIX, CURRENT_API_VERSION)
 
