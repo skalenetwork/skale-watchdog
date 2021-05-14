@@ -36,7 +36,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         time.sleep(RequestsHandler.REQUEST_SLEEP)
-        if self.path == '/api/sgx/info':
+        if self.path == '/api/v1/health/sgx':
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
         else:
@@ -94,7 +94,7 @@ def test_unsuccessfull_request(skale_api_success):
     ts_diff = timer() - start_ts
 
     data = response.json()
-    assert data == {'data': None, 'error': 'Request to http://localhost:3007/meta-info failed, code: 400'}  # noqa
+    assert data == {'data': None, 'error': 'Request to http://localhost:3007/api/v1/node/meta-info failed, code: 400'}  # noqa
     assert ts_diff < 2
 
 
