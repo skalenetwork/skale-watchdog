@@ -15,6 +15,7 @@ HEALTHCHECKS_ROUTES = {
     'endpoint': 'endpoint-info',
     'schain_versions': 'schain-containers-versions',
     'meta': 'meta-info',
+    'btrfs': 'btrfs-info',
     'ssl': 'api/ssl/status'
 }
 

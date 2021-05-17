@@ -102,6 +102,12 @@ def meta_status():
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta'])
 
 
+@app.route('/status/btrfs', methods=['GET'])
+def btrfs_status():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['btrfs'])
+
+
 @app.route('/status/ssl', methods=['GET'])
 def ssl_status():
     logger.debug(request)
