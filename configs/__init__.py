@@ -23,7 +23,9 @@ HEALTHCHECKS_ROUTES = {
     'hardware': get_api_url('node', 'hardware'),
     'endpoint': get_api_url('node', 'endpoint-info'),
     'meta': get_api_url('node', 'meta-info'),
-    'schain_versions': get_api_url('schains', 'container-versions')
+    'schain_versions': get_api_url('schains', 'container-versions'),
+    'btrfs': get_api_url('node', 'btrfs'),
+    'ssl': get_api_url('ssl', 'status')
 }
 
 API_TIMEOUT = 1000  # in seconds

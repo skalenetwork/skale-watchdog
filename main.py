@@ -102,6 +102,18 @@ def meta_status():
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta'])
 
 
+@app.route('/status/btrfs', methods=['GET'])
+def btrfs_status():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['btrfs'])
+
+
+@app.route('/status/ssl', methods=['GET'])
+def ssl_status():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ssl'])
+
+
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
