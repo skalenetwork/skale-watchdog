@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+from contextlib import contextmanager
 from concurrent.futures import as_completed, ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from multiprocessing import Process
@@ -12,7 +13,7 @@ import pytest
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
-COLD_START_TIMEOUT = 300
+COLD_START_TIMEOUT = 220
 MAX_WORKERS = 50
 
 thread_running = True
@@ -24,6 +25,8 @@ def compose_watchdog_url(host=BASE_HOST, port=WATCHDOG_PORT, route=''):
 
 class RequestsHandler(BaseHTTPRequestHandler):
     REQUEST_SLEEP = 10
+    schains_req_cnt = 0
+    endpoint_req_cnt = 0
 
     def _set_headers(self, code=200):
         self.send_response(code)
@@ -39,6 +42,23 @@ class RequestsHandler(BaseHTTPRequestHandler):
         if self.path == '/api/v1/health/sgx':
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
+        elif self.path == '/api/v1/health/schains':
+            self._set_headers(code=200)
+            if RequestsHandler.schains_req_cnt == 0:
+                response = {'status': 'ok', 'payload': {'schains': True}}
+            else:
+                response = {'status': 'ok', 'payload': {'schains': False}}
+            RequestsHandler.schains_req_cnt += 1
+        elif self.path == '/api/v1/node/endpoint-info':
+            if RequestsHandler.endpoint_req_cnt == 0:
+                self._set_headers(code=200)
+                response = {'status': 'ok', 'payload': {'endpoint': True}}
+            else:
+                self._set_headers(code=400)
+                response = {'status': 'error',
+                            'payload': {'endpoint': 'error'}}
+            RequestsHandler.endpoint_req_cnt += 1
+
         else:
             self._set_headers(code=400)
             response = {'status': 'error', 'payload': {'sgx': 'error'}}
@@ -53,7 +73,7 @@ def serve_http_server():
 
 
 @pytest.fixture(scope='module')
-def skale_api_success():
+def skale_api():
     p = Process(target=serve_http_server)
     p.start()
     time.sleep(COLD_START_TIMEOUT)
@@ -73,32 +93,60 @@ def run_request_concurrently(route):
     return results
 
 
-def test_successfull_request(skale_api_success):
+@contextmanager
+def in_time(seconds):
+    start_ts = timer()
+    yield
+    ts_diff = timer() - start_ts
+    assert ts_diff < seconds
+
+
+def test_successfull_request(skale_api):
     good_url = compose_watchdog_url(route='/status/sgx')
 
-    start_ts = timer()
-    response = requests.get(good_url, timeout=60)
-    ts_diff = timer() - start_ts
-
-    data = response.json()
-    assert data == {'data': {'sgx': 'ok'}, 'error': None}
-
-    assert ts_diff < 2
+    with in_time(seconds=2):
+        response = requests.get(good_url, timeout=60)
+        data = response.json()
+        assert data == {'data': {'sgx': 'ok'}, 'error': None}
 
 
-def test_unsuccessfull_request(skale_api_success):
+def test_unsuccessfull_request(skale_api):
     bad_url = compose_watchdog_url(route='/status/meta-info')
-
-    start_ts = timer()
-    response = requests.get(bad_url, timeout=60)
-    ts_diff = timer() - start_ts
-
-    data = response.json()
-    assert data == {'data': None, 'error': 'Request to http://localhost:3007/api/v1/node/meta-info failed, code: 400'}  # noqa
-    assert ts_diff < 2
+    with in_time(seconds=2):
+        response = requests.get(bad_url, timeout=60)
+        data = response.json()
+        assert data == {'data': None, 'error': 'Request to api/v1/node/meta-info failed, code: 400'}  # noqa
 
 
-def test_concurrent_request():
+def test_changing_request(skale_api):
+    schains_url = compose_watchdog_url(route='/status/schains')
+    endpoint_url = compose_watchdog_url(route='/status/endpoint')
+
+    with in_time(seconds=2):
+        response = requests.get(schains_url, timeout=60)
+        data = response.json()
+        assert data == {'data': {'schains': True}, 'error': None}
+
+    with in_time(seconds=2):
+        response = requests.get(endpoint_url, timeout=60)
+        data = response.json()
+        assert data == {'data': {'endpoint': True}, 'error': None}
+
+    # sleep to make sure status is changed
+    time.sleep(300)
+
+    with in_time(seconds=2):
+        response = requests.get(schains_url, timeout=60)
+        data = response.json()
+        assert data == {'data': {'schains': False}, 'error': None}
+
+    with in_time(seconds=2):
+        response = requests.get(endpoint_url, timeout=60)
+        data = response.json()
+        assert data == {'data': None, 'error': 'Request to api/v1/node/endpoint-info failed, code: 400'}  # noqa
+
+
+def test_concurrent_request(skale_api):
     start_ts = timer()
     result = run_request_concurrently(route='/status/sgx')
     ts_diff = timer() - start_ts
