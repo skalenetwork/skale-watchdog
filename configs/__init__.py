@@ -16,7 +16,8 @@ HEALTHCHECKS_ROUTES = {
     'schain_versions': 'schain-containers-versions',
     'meta': 'meta-info',
     'btrfs': 'btrfs-info',
-    'ssl': 'api/ssl/status'
+    'ssl': 'api/ssl/status',
+    'public_ip': '/api/v1/node/public-ip'
 }
 
 API_TIMEOUT = 1000  # in seconds
