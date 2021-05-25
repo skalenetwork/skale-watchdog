@@ -115,7 +115,7 @@ def ssl_status():
 
 
 @app.route('/status/validator-nodes', methods=['GET'])
-def ssl_status():
+def validator_nodes():
     logger.debug(request)
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['validator-nodes'])
 
