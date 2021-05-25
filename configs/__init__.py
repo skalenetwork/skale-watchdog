@@ -31,6 +31,5 @@ CRON_SCHEDULE = [
     -1,
     -1
 ]  # Every 8 minutes by default
-assert CRON_SCHEDULE == [-4, -1, -1, -1, -1], CRON_SCHEDULE
 
 ENV = os.getenv('ENV')
