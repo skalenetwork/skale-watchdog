@@ -22,6 +22,15 @@ HEALTHCHECKS_ROUTES = {
 
 API_TIMEOUT = 1000  # in seconds
 
-CRON_SCHEDULE = [-4, -1, -1, -1, -1]  # Every 4 minutes
+JOB_INTERVAL = int(os.getenv('JOB_INTERVAL', 480))
+
+CRON_SCHEDULE = [
+    -(JOB_INTERVAL // 60),
+    -1,
+    -1,
+    -1,
+    -1
+]  # Every 8 minutes by default
+assert CRON_SCHEDULE == [-4, -1, -1, -1, -1], CRON_SCHEDULE
 
 ENV = os.getenv('ENV')
