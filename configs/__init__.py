@@ -17,7 +17,8 @@ HEALTHCHECKS_ROUTES = {
     'meta': 'meta-info',
     'btrfs': 'btrfs-info',
     'ssl': 'api/ssl/status',
-    'public_ip': '/api/v1/node/public-ip'
+    'public_ip': '/api/v1/node/public-ip',
+    'validator-nodes': 'api/v1/health/validator-nodes'
 }
 
 API_TIMEOUT = 1000  # in seconds
