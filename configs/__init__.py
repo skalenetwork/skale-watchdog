@@ -17,11 +17,20 @@ HEALTHCHECKS_ROUTES = {
     'meta': 'meta-info',
     'btrfs': 'btrfs-info',
     'ssl': 'api/ssl/status',
+    'public_ip': '/api/v1/node/public-ip',
     'validator-nodes': 'api/v1/health/validator-nodes'
 }
 
 API_TIMEOUT = 1000  # in seconds
 
-CRON_SCHEDULE = [-4, -1, -1, -1, -1]  # Every 4 minutes
+JOB_INTERVAL = int(os.getenv('JOB_INTERVAL', 480))
+
+CRON_SCHEDULE = [
+    -(JOB_INTERVAL // 60),
+    -1,
+    -1,
+    -1,
+    -1
+]  # Every 8 minutes by default
 
 ENV = os.getenv('ENV')
