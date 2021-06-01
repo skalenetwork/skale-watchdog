@@ -27,7 +27,7 @@ from werkzeug.exceptions import InternalServerError
 import utils.background_tasks  # noqa
 from configs import HEALTHCHECKS_ROUTES
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.healthchecks import get_healthcheck_from_skale_api
+from utils.healthchecks import get_healthcheck_from_skale_api, get_ima_healthchecks
 from utils.log import init_default_logger
 from utils.structures import construct_err_response
 
@@ -112,6 +112,12 @@ def btrfs_status():
 def ssl_status():
     logger.debug(request)
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ssl'])
+
+
+@app.route('/status/ima', methods=['GET'])
+def ima_status():
+    logger.debug(request)
+    return get_ima_healthchecks()
 
 
 if __name__ == '__main__':
