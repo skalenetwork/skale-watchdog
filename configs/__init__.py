@@ -1,5 +1,10 @@
 import os
 
+SKALE_DIR_HOST = '/home/alex/.skale'
+NODE_DATA_PATH = os.path.join(SKALE_DIR_HOST, 'node_data')
+SCHAINS_DIR_NAME = 'schains'
+SCHAINS_DIR_PATH = os.path.join(NODE_DATA_PATH, SCHAINS_DIR_NAME)
+SCHAINS_PREFIX = 'schain_'
 
 LONG_LINE = '=' * 100
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
