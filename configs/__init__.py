@@ -1,7 +1,6 @@
 import os
 
-SKALE_DIR_HOST = '/home/alex/.skale'
-NODE_DATA_PATH = os.path.join(SKALE_DIR_HOST, 'node_data')
+NODE_DATA_PATH = '/skale_node_data'
 SCHAINS_DIR_NAME = 'schains'
 SCHAINS_DIR_PATH = os.path.join(NODE_DATA_PATH, SCHAINS_DIR_NAME)
 SCHAINS_PREFIX = 'schain_'
