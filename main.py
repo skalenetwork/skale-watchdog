@@ -27,7 +27,8 @@ from werkzeug.exceptions import InternalServerError
 import utils.background_tasks  # noqa
 from configs import HEALTHCHECKS_ROUTES
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.healthchecks import get_healthcheck_from_skale_api, get_ima_healthchecks
+from utils.healthchecks import get_healthcheck_from_skale_api
+from utils.ima import get_ima_healthchecks
 from utils.log import init_default_logger
 from utils.structures import construct_err_response
 
@@ -117,10 +118,10 @@ def ssl_status():
 @app.route('/status/ima', methods=['GET'])
 def ima_status():
     logger.debug(request)
-    return get_ima_healthchecks()
+    return get_ima_healthchecks().to_flask_response()
 
 
 if __name__ == '__main__':
-    logger.info('Starting SKALE docker containers Watchdog')
+    logger.info('Starting SKALE Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
             host=FLASK_APP_HOST, use_reloader=False)
