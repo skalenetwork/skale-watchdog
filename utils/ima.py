@@ -60,20 +60,25 @@ def get_ima_healthchecks():
     ima_healthchecks = []
     for schain_name in os.listdir(SCHAINS_DIR_PATH):
         print(schain_name)
-        ima_port = get_ima_monitoring_port(schain_name)
-        if ima_port:
+        error_text = None
+        ima_healthcheck = []
+
+        try:
+            ima_port = get_ima_monitoring_port(schain_name)
+        except KeyError as err:
+            logger.exception(err)
+            error_text = repr(err)
+        else:
+            if ima_port is None:
+                continue
             endpoint = f'ws://localhost:{ima_port}'
             try:
-                ima_health_check = request_ima_healthcheck(endpoint)
+                ima_healthcheck = request_ima_healthcheck(endpoint)
             except Exception as err:
                 logger.exception(err)
-                ima_healthchecks.append({schain_name: {'error': str(err)}})
-            else:
-                ima_healthchecks.append({schain_name: {'error': None,
-                                                       'last_ima_errors': ima_health_check}})
-    # print(f'healthchecks = {"data": ima_healthchecks}')
-
-    # return ima_healthchecks
+                error_text = repr(err)
+        ima_healthchecks.append({schain_name: {'error': error_text,
+                                               'last_ima_errors': ima_healthcheck}})
     return construct_ok_response(ima_healthchecks)
 
 
