@@ -1,14 +1,22 @@
-from websocket import create_connection
+from websocket import create_connection, WebSocketException
 import json
 from datetime import datetime
 import os
 from configs import SCHAINS_DIR_PATH, SCHAINS_PREFIX
+import logging
+from utils.structures import construct_ok_response
+
+logger = logging.getLogger(__name__)
 
 
 def request_ima_healthcheck(endpoint):
-    ws = create_connection(endpoint, timeout=5)
-    ws.send('{ "id": 1, "method": "get_last_transfer_errors"}')
-    result = ws.recv()
+    try:
+        ws = create_connection(endpoint, timeout=5)
+        ws.send('{ "id": 1, "method": "get_last_transfer_errors"}')
+        result = ws.recv()
+    except WebSocketException as err:
+        logger.exception(err)
+        return []
     print("Received '%s'" % result)
     print(type(result))
     errs_json = json.loads(result)
@@ -52,29 +60,22 @@ def get_ima_healthchecks():
     ima_healthchecks = []
     for schain_name in os.listdir(SCHAINS_DIR_PATH):
         print(schain_name)
-        port = get_ima_monitoring_port(schain_name)
-        if port:
-            endpoint = f'ws://localhost:{port}'
-            ima_health_check = request_ima_healthcheck(endpoint)
-            ima_healthchecks.append({schain_name: ima_health_check})
-    print(f'healthchecks = {ima_healthchecks}')
+        ima_port = get_ima_monitoring_port(schain_name)
+        if ima_port:
+            endpoint = f'ws://localhost:{ima_port}'
+            try:
+                ima_health_check = request_ima_healthcheck(endpoint)
+            except Exception as err:
+                logger.exception(err)
+                ima_healthchecks.append({schain_name: {'error': str(err)}})
+            else:
+                ima_healthchecks.append({schain_name: {'error': None,
+                                                       'last_ima_errors': ima_health_check}})
+    # print(f'healthchecks = {"data": ima_healthchecks}')
 
-    return ima_healthchecks
+    # return ima_healthchecks
+    return construct_ok_response(ima_healthchecks)
 
-
-get_ima_healthchecks()
-
-
-# def get_ima_healthchecks():
-#     ima_healthchecks = []
-#     endpoints = get_ima_enpoints()
-#     for endpoint in endpoints:
-#         ima_err = request_ima_healthcheck(endpoint)
-#         ima_healthchecks.append()
-#     # endpoint = 'ws://192.168.2.38:13000'
-#
-#     print(f'IMA ERRORS: {ima_errs}')
-#     print('THE END')
 
 
 
