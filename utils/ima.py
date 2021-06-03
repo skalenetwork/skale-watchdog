@@ -80,7 +80,3 @@ def get_ima_healthchecks():
         ima_healthchecks.append({schain_name: {'error': error_text,
                                                'last_ima_errors': ima_healthcheck}})
     return construct_ok_response(ima_healthchecks)
-
-
-
-
