@@ -16,14 +16,12 @@ def request_ima_healthcheck(endpoint):
         result = ws.recv()
     except WebSocketException as err:
         logger.exception(err)
-        return []
-    print("Received '%s'" % result)
-    print(type(result))
+        if ws.connected:
+            ws.close()
+        raise err
+    print(f'Received {result}')
     errs_json = json.loads(result)
     errs = errs_json['last_transfer_errors']
-    print(f'Num = {len(errs)} >>> ERS={errs}')
-    for err in errs:
-        print(datetime.utcfromtimestamp(err['ts']))
     ws.close()
     return errs
 
