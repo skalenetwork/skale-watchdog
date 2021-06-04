@@ -18,10 +18,11 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-from dataclasses import dataclass
+from http import HTTPStatus
 
 from flask import Response
-from http import HTTPStatus
+
+from dataclasses import dataclass
 
 
 @dataclass

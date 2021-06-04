@@ -1,11 +1,12 @@
-from websocket import create_connection, WebSocketException
 import json
-import os
-from configs import SCHAINS_DIR_PATH, SCHAINS_PREFIX
 import logging
-from utils.structures import construct_ok_response
+import os
+
+from websocket import create_connection
+
+from configs import HEALTHCHECKS_ROUTES, SCHAINS_DIR_PATH, SCHAINS_PREFIX
 from utils.healthchecks import request_healthcheck_from_skale_api
-from configs import HEALTHCHECKS_ROUTES
+from utils.structures import construct_ok_response
 
 logger = logging.getLogger(__name__)
 

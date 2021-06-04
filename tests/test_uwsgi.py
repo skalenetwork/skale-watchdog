@@ -1,14 +1,13 @@
 import json
-import requests
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
-from concurrent.futures import as_completed, ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from multiprocessing import Process
 from timeit import default_timer as timer
 
 import pytest
-
+import requests
 
 API_PORT = 3007
 WATCHDOG_PORT = 3009

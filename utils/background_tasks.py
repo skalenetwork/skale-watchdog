@@ -24,9 +24,8 @@ from timeit import default_timer as timer
 from uwsgidecorators import cron
 
 from configs import CRON_SCHEDULE
-from utils.healthchecks import request_all_healthchecks
 from utils.cache import get_cache
-
+from utils.healthchecks import request_all_healthchecks
 
 logger = logging.getLogger(__name__)
 

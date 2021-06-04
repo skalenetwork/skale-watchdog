@@ -19,17 +19,15 @@
 
 import json
 import pickle
-import requests
 from http import HTTPStatus
 from unittest import mock
-from configs import HEALTHCHECKS_ROUTES
 
-from utils.healthchecks import (
-    get_healthcheck_from_skale_api,
-    get_healthcheck_url,
-    request_all_healthchecks
-)
+import requests
+
+from configs import HEALTHCHECKS_ROUTES
 from utils.cache import get_cache
+from utils.healthchecks import (get_healthcheck_from_skale_api,
+                                get_healthcheck_url, request_all_healthchecks)
 from utils.structures import construct_ok_response
 
 data_ok1 = {

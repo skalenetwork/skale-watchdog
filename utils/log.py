@@ -18,10 +18,9 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import hashlib
+import logging
 import re
 import sys
-import logging
-
 
 HIDING_PATTERNS = [
     r'NEK\:\w+',

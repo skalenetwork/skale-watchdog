@@ -18,19 +18,14 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import requests
 from http import HTTPStatus
 
-from configs import (
-    API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECKS_ROUTES
-)
-from utils.cache import get_cache
-from utils.structures import (
-    construct_err_response,
-    construct_ok_response,
-    SkaleApiResponse
-)
+import requests
 
+from configs import API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECKS_ROUTES
+from utils.cache import get_cache
+from utils.structures import (SkaleApiResponse, construct_err_response,
+                              construct_ok_response)
 
 logger = logging.getLogger(__name__)
 

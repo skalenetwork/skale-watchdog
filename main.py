@@ -20,7 +20,6 @@
 import logging
 import time
 
-
 from flask import Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
