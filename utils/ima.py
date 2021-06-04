@@ -16,15 +16,12 @@ def request_ima_healthcheck(endpoint):
         ws = create_connection(endpoint, timeout=5)
         ws.send('{ "id": 1, "method": "get_last_transfer_errors"}')
         result = ws.recv()
-    except WebSocketException as err:
-        logger.exception(err)
+    finally:
         if ws and ws.connected:
             ws.close()
-        raise err
-    print(f'Received {result}')
+    logger.debug(f'Received {result}')
     errs_json = json.loads(result)
     errs = errs_json['last_transfer_errors']
-    ws.close()
     return errs
 
 
@@ -56,6 +53,13 @@ def get_schain_config_file_name(schain_name):
     return f'{SCHAINS_PREFIX}{schain_name}.json'
 
 
+def get_ima_containers():
+    response = request_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['containers'])
+    containers = response.data['data']
+    ima_containers = [{container['name']: container['state']['Status']} for container in containers]
+    return ima_containers
+
+
 def get_ima_healthchecks():
     ima_containers = get_ima_containers()
     ima_healthchecks = []
@@ -69,7 +73,7 @@ def get_ima_healthchecks():
         if cont_data is None:
             continue
         elif cont_data['state'] != 'running':
-            error_text = 'Docker container is not running'
+            error_text = 'IMA docker container is not running'
         else:
             try:
                 ima_port = get_ima_monitoring_port(schain_name)
@@ -88,14 +92,3 @@ def get_ima_healthchecks():
         ima_healthchecks.append({schain_name: {'error': error_text,
                                                'last_ima_errors': ima_healthcheck}})
     return construct_ok_response(ima_healthchecks)
-
-
-def get_ima_containers():
-    response = request_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['containers'])
-    containers = response.data['data']
-    ima_containers = [{container['name']: container['state']['Status']} for container in containers]
-    print(ima_containers)
-    return ima_containers
-
-
-
