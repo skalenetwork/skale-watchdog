@@ -27,7 +27,6 @@ def request_ima_healthcheck(endpoint):
 
 def get_schain_config(schain_name):
     config_filepath = get_schain_config_filepath(schain_name)
-    print(config_filepath)
     if os.path.exists(config_filepath):
         with open(config_filepath) as f:
             schain_config = json.load(f)
@@ -64,7 +63,6 @@ def get_ima_healthchecks():
     ima_containers = get_ima_containers()
     ima_healthchecks = []
     for schain_name in os.listdir(SCHAINS_DIR_PATH):
-        print(schain_name)
         error_text = None
         ima_healthcheck = []
         container_name = f'skale_ima_{schain_name}'
@@ -87,6 +85,7 @@ def get_ima_healthchecks():
                 try:
                     ima_healthcheck = request_ima_healthcheck(endpoint)
                 except Exception as err:
+                    logger.info(f'Error occurred while checking IMA state on {endpoint}')
                     logger.exception(err)
                     error_text = repr(err)
         ima_healthchecks.append({schain_name: {'error': error_text,
