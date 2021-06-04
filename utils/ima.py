@@ -1,6 +1,5 @@
 from websocket import create_connection, WebSocketException
 import json
-from datetime import datetime
 import os
 from configs import SCHAINS_DIR_PATH, SCHAINS_PREFIX
 import logging
@@ -12,13 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 def request_ima_healthcheck(endpoint):
+    ws = None
     try:
         ws = create_connection(endpoint, timeout=5)
         ws.send('{ "id": 1, "method": "get_last_transfer_errors"}')
         result = ws.recv()
     except WebSocketException as err:
         logger.exception(err)
-        if ws.connected:
+        if ws and ws.connected:
             ws.close()
         raise err
     print(f'Received {result}')
