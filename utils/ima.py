@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def request_ima_healthcheck(endpoint):
-    ws = None
+    result, ws = None, None
     try:
         ws = create_connection(endpoint, timeout=5)
         ws.send('{ "id": 1, "method": "get_last_transfer_errors"}')
@@ -21,8 +21,11 @@ def request_ima_healthcheck(endpoint):
         if ws and ws.connected:
             ws.close()
     logger.debug(f'Received {result}')
-    errs_json = json.loads(result)
-    errs = errs_json['last_transfer_errors']
+    if result:
+        errs_json = json.loads(result)
+        errs = errs_json['last_transfer_errors']
+    else:
+        errs = 'Request failed'
     return errs
 
 
