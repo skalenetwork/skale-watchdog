@@ -35,11 +35,15 @@ from utils.structures import (
 logger = logging.getLogger(__name__)
 
 
-def get_healthcheck_from_skale_api(route, rcache=None):
-    rcache = rcache or get_cache()
-    cached_response = SkaleApiResponse.from_bytes(
-        rcache.get_item(route)
-    )
+def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False):
+    if not no_cache:
+        rcache = rcache or get_cache()
+        cached_response = SkaleApiResponse.from_bytes(
+            rcache.get_item(route)
+        )
+    else:
+        logger.info('No cache mode is enabled')
+        cached_response = None
     response = cached_response or request_healthcheck_from_skale_api(route)
     if cached_response:
         logger.info(f'Cached response for {route} founded')
