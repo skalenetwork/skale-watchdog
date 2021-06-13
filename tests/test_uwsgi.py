@@ -98,7 +98,8 @@ def in_time(seconds):
     start_ts = timer()
     yield
     ts_diff = timer() - start_ts
-    assert ts_diff < seconds
+    if ts_diff > seconds:
+        raise TimeoutError(f'Operation excuted more than {seconds}')
 
 
 def test_successfull_request(skale_api):
@@ -114,6 +115,30 @@ def test_unsuccessfull_request(skale_api):
     bad_url = compose_watchdog_url(route='/status/meta-info')
     with in_time(seconds=2):
         response = requests.get(bad_url, timeout=60)
+        data = response.json()
+        assert data == {'data': None, 'error': 'Request to api/v1/node/meta-info failed, code: 400'}  # noqa
+
+
+def test_request_no_cache(skale_api):
+    good_url = compose_watchdog_url(route='/status/sgx')
+
+    with pytest.raises(TimeoutError):
+        with in_time(seconds=2):
+            response = requests.get(good_url, json={'_cold': True}, timeout=60)
+
+    with in_time(seconds=50):
+        response = requests.get(good_url, json={'_cold': True}, timeout=60)
+        data = response.json()
+        assert data == {'data': {'sgx': 'ok'}, 'error': None}
+
+    bad_url = compose_watchdog_url(route='/status/meta-info')
+
+    with pytest.raises(TimeoutError):
+        with in_time(seconds=2):
+            response = requests.get(bad_url, json={'_cold': True}, timeout=60)
+
+    with in_time(seconds=50):
+        response = requests.get(bad_url, json={'_cold': True}, timeout=60)
         data = response.json()
         assert data == {'data': None, 'error': 'Request to api/v1/node/meta-info failed, code: 400'}  # noqa
 
