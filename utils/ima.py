@@ -56,15 +56,16 @@ def get_schain_config_file_name(schain_name):
     return f'{SCHAINS_PREFIX}{schain_name}.json'
 
 
-def get_ima_containers():
+def get_container_statuses():
     response = request_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['containers'])
     containers = response.data['data']
-    ima_containers = [{container['name']: container['state']['Status']} for container in containers]
+    ima_containers = [{'name': container['name'], 'state': container['state']['Status']}
+                      for container in containers]
     return ima_containers
 
 
 def get_ima_healthchecks():
-    ima_containers = get_ima_containers()
+    ima_containers = get_container_statuses()
     ima_healthchecks = []
     for schain_name in os.listdir(SCHAINS_DIR_PATH):
         error_text = None
