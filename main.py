@@ -114,6 +114,12 @@ def ssl_status():
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ssl'])
 
 
+@app.route('/status/ima', methods=['GET'])
+def ima_status():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ima'])
+
+
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
