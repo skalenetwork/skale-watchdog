@@ -20,6 +20,7 @@ HEALTHCHECKS_ROUTES = {
     'containers': get_api_url('health', 'containers'),
     'sgx': get_api_url('health', 'sgx'),
     'schains': get_api_url('health', 'schains'),
+    'ima': get_api_url('health', 'ima'),
     'hardware': get_api_url('node', 'hardware'),
     'endpoint': get_api_url('node', 'endpoint-info'),
     'meta': get_api_url('node', 'meta-info'),
