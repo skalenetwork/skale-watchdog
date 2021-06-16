@@ -25,13 +25,13 @@ import logging
 
 HIDING_PATTERNS = [
     r'NEK\:\w+',
-    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
-    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',  # noqa
+    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'  # noqa
 ]
 
 
 class HidingFormatter:
-    def __init__(self, base_formatter, patterns):
+    def __init__(self, base_formatter, patterns=HIDING_PATTERNS):
         self.base_formatter = base_formatter
         self._patterns = patterns
 
