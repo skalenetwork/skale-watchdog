@@ -163,6 +163,20 @@ def ima_status():
     return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ima'])
 
 
+@app.route('/status/public-ip', methods=['GET'])
+def public_ip():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['public_ip'])
+
+
+@app.route('/status/validator-nodes', methods=['GET'])
+def validator_nodes():
+    logger.debug(request)
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['validator-nodes']
+    )
+
+
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
