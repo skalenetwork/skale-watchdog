@@ -59,15 +59,15 @@ class RequestsHandler(BaseHTTPRequestHandler):
             time.sleep(10)
             msg = self.get_msg(mq_schains)
             self._set_headers(code=200)
-            if self.schains_state == 1 or msg == 'schains':
-                self.schains_state = 1
+            if RequestsHandler.schains_state == 1 or msg == 'schains':
+                RequestsHandler.schains_state = 1
                 response = {'status': 'ok', 'payload': {'schains': True}}
             else:
                 response = {'status': 'ok', 'payload': {'schains': False}}
         elif self.path == '/api/v1/node/endpoint-info':
             msg = self.get_msg(mq_endpoint)
-            if self.endpoint_state == 1 or msg == 'endpoint':
-                self.endpoint_state = 1
+            if RequestsHandler.endpoint_state == 1 or msg == 'endpoint':
+                RequestsHandler.endpoint_state = 1
                 self._set_headers(code=200)
                 response = {'status': 'ok', 'payload': {'endpoint': True}}
             else:
