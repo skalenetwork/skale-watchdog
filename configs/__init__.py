@@ -26,12 +26,16 @@ HEALTHCHECKS_ROUTES = {
     'meta': get_api_url('node', 'meta-info'),
     'schain_versions': get_api_url('schains', 'container-versions'),
     'btrfs': get_api_url('node', 'btrfs'),
-    'ssl': get_api_url('ssl', 'status')
+    'ssl': get_api_url('ssl', 'status'),
+    'public-ip': get_api_url('node', 'public-ip'),
+    'validator_nodes': get_api_url('node', 'validator-nodes')
 }
 
 API_TIMEOUT = 1000  # in seconds
 DEFAULT_TASK_INTERVAL = 60
 SIGNAL_OFFSET = 20
 DISABLE_BACKGROUND = bool(os.getenv('DISABLE_BACKGROUND') or False)
+
+API_TIMEOUT = 1000  # in seconds
 
 ENV = os.getenv('ENV')
