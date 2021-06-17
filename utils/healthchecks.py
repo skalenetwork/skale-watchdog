@@ -24,7 +24,7 @@ from http import HTTPStatus
 from configs import (
     API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECKS_ROUTES
 )
-from utils.cache import get_cache
+from utils.cache import Cache, get_cache
 from utils.structures import (
     construct_err_response,
     construct_ok_response,
@@ -35,11 +35,15 @@ from utils.structures import (
 logger = logging.getLogger(__name__)
 
 
-def get_healthcheck_from_skale_api(route, rcache=None):
-    rcache = rcache or get_cache()
-    cached_response = SkaleApiResponse.from_bytes(
-        rcache.get_item(route)
-    )
+def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False):
+    if not no_cache:
+        rcache = rcache or get_cache()
+        cached_response = SkaleApiResponse.from_bytes(
+            rcache.get_item(route)
+        )
+    else:
+        logger.info('No cache mode is enabled')
+        cached_response = None
     response = cached_response or request_healthcheck_from_skale_api(route)
     if cached_response:
         logger.info(f'Cached response for {route} founded')
@@ -109,3 +113,10 @@ def request_all_healthchecks(rcache=None):
             f'{route} request returned {response.code} status code, '
             f'response: {response}. Saving to cache')
         rcache.update_item(route, response.to_bytes())
+
+
+def request_health(check: str, mode: str = 'direct', rcache: Cache = None):
+    rcache = rcache or get_cache()
+    route = HEALTHCHECKS_ROUTES[check]
+    response = request_healthcheck_from_skale_api(route, mode=mode)
+    rcache.update_item(route, response.to_bytes())

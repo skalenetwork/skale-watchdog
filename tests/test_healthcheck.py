@@ -33,9 +33,14 @@ from utils.cache import get_cache
 from utils.structures import construct_ok_response
 
 data_ok1 = {
-    'name': 'container_name',
+    'name': 'container_name1',
     'state': {'Running': True, 'Paused': False},
-    'sgx_keyname': 'test-keyname', 'sgx_server_url': 'test-url'
+    'sgx_keyname': 'test-keyname1', 'sgx_server_url': 'test-url1'
+}
+data_ok2 = {
+    'name': 'container_name2',
+    'state': {'Running': False, 'Paused': True},
+    'sgx_keyname': 'test-keyname2', 'sgx_server_url': 'test-url2'
 }
 
 
@@ -88,7 +93,7 @@ def test_healthcheck_pos(mock_get):
                 'code': HTTPStatus.OK,
                 'data': {
                     'data': {
-                        **data_ok1
+                        **data_ok2
                     },
                     'error': None
                 }
@@ -96,6 +101,13 @@ def test_healthcheck_pos(mock_get):
         ).encode('utf-8')
     )
     res = get_healthcheck_from_skale_api(route)
+    expected = construct_ok_response(data_ok2).to_flask_response()
+    assert res.status_code == expected.status_code
+    assert res.response == expected.response
+    assert pickle.dumps(res) == pickle.dumps(expected)
+
+    # Check using no_cache option
+    res = get_healthcheck_from_skale_api(route, no_cache=True)
     expected = construct_ok_response(data_ok1).to_flask_response()
     assert res.status_code == expected.status_code
     assert res.response == expected.response

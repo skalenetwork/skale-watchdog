@@ -30,7 +30,8 @@ HEALTHCHECKS_ROUTES = {
 }
 
 API_TIMEOUT = 1000  # in seconds
-
-CRON_SCHEDULE = [-4, -1, -1, -1, -1]  # Every 4 minutes
+DEFAULT_TASK_INTERVAL = 60
+SIGNAL_OFFSET = 20
+DISABLE_BACKGROUND = bool(os.getenv('DISABLE_BACKGROUND') or False)
 
 ENV = os.getenv('ENV')

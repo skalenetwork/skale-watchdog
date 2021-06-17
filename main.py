@@ -61,57 +61,100 @@ def handle_500(e):
 @app.route('/status/core', methods=['GET'])
 def containers_core_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['containers'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['containers'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/sgx', methods=['GET'])
 def sgx_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['sgx'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['sgx'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/schains', methods=['GET'])
 def schains_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['schains'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['schains'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/hardware', methods=['GET'])
 def hardware_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['hardware'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['hardware'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/endpoint', methods=['GET'])
 def endpoint_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['endpoint'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['endpoint'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/schain-containers-versions', methods=['GET'])
 def schain_containers_versions_status():
     logger.debug(request)
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
     return get_healthcheck_from_skale_api(
-        HEALTHCHECKS_ROUTES['schain_versions']
+        HEALTHCHECKS_ROUTES['schain_versions'],
+        no_cache=cold
     )
 
 
 @app.route('/status/meta-info', methods=['GET'])
 def meta_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['meta'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['meta'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/btrfs', methods=['GET'])
 def btrfs_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['btrfs'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['btrfs'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/ssl', methods=['GET'])
 def ssl_status():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['ssl'])
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_from_skale_api(
+        HEALTHCHECKS_ROUTES['ssl'],
+        no_cache=cold
+    )
 
 
 @app.route('/status/ima', methods=['GET'])
