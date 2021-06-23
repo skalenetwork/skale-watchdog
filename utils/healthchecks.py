@@ -35,7 +35,7 @@ from utils.structures import (
 logger = logging.getLogger(__name__)
 
 
-def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False):
+def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False, params=None):
     if not no_cache:
         rcache = rcache or get_cache()
         cached_response = SkaleApiResponse.from_bytes(
@@ -44,7 +44,7 @@ def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False):
     else:
         logger.info('No cache mode is enabled')
         cached_response = None
-    response = cached_response or request_healthcheck_from_skale_api(route)
+    response = cached_response or request_healthcheck_from_skale_api(route, params=params)
     if cached_response:
         logger.info(f'Cached response for {route} founded')
         logger.debug(f'Cached response for {route}: {response}')
@@ -54,11 +54,11 @@ def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False):
     return response.to_flask_response()
 
 
-def request_healthcheck_from_skale_api(route, mode='direct'):
+def request_healthcheck_from_skale_api(route, mode='direct', params=None):
     url = get_healthcheck_url(route)
     logger.info(f'Requesting data from {url}, mode: {mode}')
     try:
-        response = requests.get(url, timeout=API_TIMEOUT)
+        response = requests.get(url, timeout=API_TIMEOUT, params=params)
     except requests.exceptions.ConnectionError as err:
         err_msg = f'Could not connect to {route}'
         logger.error(f'{err_msg}. {err}')
