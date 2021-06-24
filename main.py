@@ -170,7 +170,7 @@ def ima_status():
 @app.route('/status/public-ip', methods=['GET'])
 def public_ip():
     logger.debug(request)
-    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['public_ip'])
+    return get_healthcheck_from_skale_api(HEALTHCHECKS_ROUTES['public-ip'])
 
 
 @app.route('/status/validator-nodes', methods=['GET'])
