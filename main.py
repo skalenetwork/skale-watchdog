@@ -63,9 +63,13 @@ def containers_core_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
+    params = {
+        'all': 'True'
+    }
     return get_healthcheck_from_skale_api(
         HEALTHCHECKS_ROUTES['containers'],
-        no_cache=cold
+        no_cache=cold,
+        params=params
     )
 
 
