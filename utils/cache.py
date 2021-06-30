@@ -54,13 +54,17 @@ class UwsgiCache(Cache):
     def update_item(self, route, value):
         logger.debug(f'Saving {route} request result {value}')
         r = self.uwsgi.cache_update(route, value)
-        logger.info(f'Update for {route} finished with result: {r}')
+        logger.debug(f'Update for {route} finished with {r}')
+        return r is True
 
     def del_item(self, route):
         logger.debug(f'Trying to delete {route} request result from the cache')
+        r = True
         if self.get_item(route) is not None:
             logger.debug(f'Deleting {route} request result from the cache')
-            self.uwsgi.cache_del(route)
+            r = self.uwsgi.cache_del(route)
+            logger.debug(f'Deleting for {route} finished with {r}')
+        return r
 
 
 class MemoryCache(Cache):
@@ -72,10 +76,12 @@ class MemoryCache(Cache):
 
     def update_item(self, route, value):
         self.cache[route] = value
+        return True
 
     def del_item(self, route):
         if route in self.cache:
             del self.cache[route]
+        return True
 
 
 def init_cache():
