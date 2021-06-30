@@ -119,4 +119,6 @@ def request_health(check: str, mode: str = 'direct', rcache: Cache = None):
     rcache = rcache or get_cache()
     route = HEALTHCHECKS_ROUTES[check]
     response = request_healthcheck_from_skale_api(route, mode=mode)
-    rcache.update_item(route, response.to_bytes())
+    r = rcache.update_item(route, response.to_bytes())
+    if not r:
+        logger.error(f'Updating cache item for {check} failed')
