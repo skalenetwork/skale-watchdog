@@ -53,7 +53,8 @@ class UwsgiCache(Cache):
 
     def update_item(self, route, value):
         logger.debug(f'Saving {route} request result {value}')
-        self.uwsgi.cache_update(route, value)
+        r = self.uwsgi.cache_update(route, value)
+        logger.info(f'Update for {route} finished with result: {r}')
 
     def del_item(self, route):
         logger.debug(f'Trying to delete {route} request result from the cache')
