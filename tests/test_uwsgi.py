@@ -1,5 +1,6 @@
 import json
 import queue
+import logging
 import requests
 import time
 from contextlib import contextmanager
@@ -13,11 +14,16 @@ import pytest
 from configs import DEFAULT_TASK_INTERVAL
 
 
+logger = logging.getLogger(__name__)
+
+
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
 COLD_START_TIMEOUT = 2 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
+CONCURRENT_REQ_NUMBER = 4
+
 
 thread_running = True
 
@@ -97,17 +103,27 @@ def skale_api():
     p.terminate()
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
 
 
 def run_request_concurrently(route):
+    def make_request(url):
+        try:
+            return requests.get(url, timeout=60)
+        except Exception as e:
+            logger.error('Request failed with %s', e)
+            return None
+
     good_url = compose_watchdog_url(route='/status/sgx')
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
-        futures.append(e.submit(requests.get, good_url, timeout=60))
+        futures = [
+            e.submit(make_request, good_url)
+            for _ in range(CONCURRENT_REQ_NUMBER)
+        ]
 
     results = [
         future.result() for future in as_completed(futures)
@@ -220,6 +236,7 @@ def test_concurrent_request(skale_api):
     result = run_request_concurrently(route='/status/sgx')
     ts_diff = timer() - start_ts
     for r in result:
+        assert r is not None
         data = r.json()
         assert data == {'data': {'sgx': 'ok'}, 'error': None}
     assert ts_diff < 2
