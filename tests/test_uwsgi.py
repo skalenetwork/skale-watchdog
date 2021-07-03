@@ -1,5 +1,6 @@
 import json
 import queue
+import logging
 import requests
 import time
 from contextlib import contextmanager
@@ -13,11 +14,14 @@ import pytest
 from configs import DEFAULT_TASK_INTERVAL
 
 
+logger = logging.getLogger(__name__)
+
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
 COLD_START_TIMEOUT = 2 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
+CONCURRENT_REQ_NUMBER = 4
 
 thread_running = True
 
@@ -31,7 +35,7 @@ mq_endpoint = Queue()
 
 
 class RequestsHandler(BaseHTTPRequestHandler):
-    REQUEST_SLEEP = 3
+    REQUEST_SLEEP = 10
     schains_state = 0
     endpoint_state = 0
 
@@ -93,6 +97,8 @@ def skale_api():
     p = Process(target=serve_http_server)
     p.start()
     time.sleep(COLD_START_TIMEOUT)
+    ts = time.time()
+    logger.info('API started %d', ts)
     yield
     p.terminate()
 
@@ -104,14 +110,27 @@ def test_api_spawner(skale_api):
 
 
 def run_request_concurrently(route):
+    def make_request(url):
+        try:
+            return requests.get(url, timeout=60)
+        except Exception as e:
+            logger.error('Request failed with %s', e)
+            return None
+
     good_url = compose_watchdog_url(route='/status/sgx')
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
-        futures.append(e.submit(requests.get, good_url, timeout=60))
+        futures = [
+            e.submit(make_request, good_url)
+            for _ in range(CONCURRENT_REQ_NUMBER)
+        ]
 
-    results = [
-        future.result() for future in as_completed(futures)
-    ]
+    results = []
+    for f in as_completed(futures):
+        r = f.result()
+        ts = int(time.time())
+        print(f'Completed {ts}: {r}')
+        results.append(r)
     return results
 
 

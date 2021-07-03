@@ -44,7 +44,8 @@ def get_healthcheck_from_skale_api(route, rcache=None, no_cache=False, params=No
     else:
         logger.info('No cache mode is enabled')
         cached_response = None
-    response = cached_response or request_healthcheck_from_skale_api(route, params=params)
+    response = cached_response or request_healthcheck_from_skale_api(
+        route, params=params)
     if cached_response:
         logger.info(f'Cached response for {route} founded')
         logger.debug(f'Cached response for {route}: {response}')
@@ -122,3 +123,4 @@ def request_health(check: str, mode: str = 'direct', rcache: Cache = None):
     r = rcache.update_item(route, response.to_bytes())
     if not r:
         logger.error(f'Updating cache item for {check} failed')
+    return response
