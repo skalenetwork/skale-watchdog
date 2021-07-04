@@ -35,16 +35,16 @@ from utils.healthchecks import request_health
 logger = logging.getLogger(__name__)
 
 
-def task(num, route, mode):
+def task(num, route):
     logger.info('[TASK %d] Started', num)
     start = timer()
-    request_health(route, mode)
+    request_health(route, task=num)
     elapsed = int(timer() - start)
     logger.info('[TASK %d] Finished, elapsed time %ds', num, elapsed)
 
 
 def make_background_task(route):
-    return partial(task, route=route, mode='background')
+    return partial(task, route=route)
 
 
 def init_tasks():

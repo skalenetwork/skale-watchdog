@@ -60,7 +60,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
         elif self.path == '/api/v1/health/schains':
-            time.sleep(10)
+            time.sleep(30)
             msg = self.get_msg(mq_schains)
             self._set_headers(code=200)
             if RequestsHandler.schains_state == 1 or msg == 'schains':
@@ -69,6 +69,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
             else:
                 response = {'status': 'ok', 'payload': {'schains': False}}
         elif self.path == '/api/v1/node/endpoint-info':
+            time.sleep(20)
             msg = self.get_msg(mq_endpoint)
             if RequestsHandler.endpoint_state == 1 or msg == 'endpoint':
                 RequestsHandler.endpoint_state = 1
@@ -103,7 +104,7 @@ def skale_api():
     p.terminate()
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
@@ -239,6 +240,7 @@ def test_concurrent_request(skale_api):
     result = run_request_concurrently(route='/status/sgx')
     ts_diff = timer() - start_ts
     for r in result:
+        assert r is not None
         data = r.json()
         assert data == {'data': {'sgx': 'ok'}, 'error': None}
     assert ts_diff < 2
