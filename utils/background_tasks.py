@@ -52,7 +52,7 @@ def init_tasks():
     for i, check in enumerate(HEALTHCHECKS_ROUTES):
         num = SIGNAL_OFFSET + i
         logger.info('Adding task %d %s', i, check)
-        uwsgi.register_signal(num, 'worker', make_background_task(check))
+        uwsgi.register_signal(num, 'spooler', make_background_task(check))
         interval = DEFAULT_TASK_INTERVAL
         if check == 'schains':
             interval *= 2

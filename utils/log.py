@@ -18,9 +18,9 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import hashlib
+import logging
 import re
 import sys
-import logging
 
 
 HIDING_PATTERNS = [
@@ -53,7 +53,7 @@ class HidingFormatter:
 def init_default_logger():  # pragma: no cover
     handlers = []
     base_formatter = logging.Formatter(
-        '[%(asctime)s %(levelname)s] %(name)s:%(lineno)d - %(threadName)s - %(message)s'  # noqa
+        '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
     )
     formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
 

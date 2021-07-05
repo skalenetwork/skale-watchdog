@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
-COLD_START_TIMEOUT = 2 * DEFAULT_TASK_INTERVAL
+COLD_START_TIMEOUT = 3 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
 CONCURRENT_REQ_NUMBER = 4
 
@@ -37,7 +37,7 @@ mq_endpoint = Queue()
 
 
 class RequestsHandler(BaseHTTPRequestHandler):
-    REQUEST_SLEEP = 3
+    REQUEST_SLEEP = 10
     schains_state = 0
     endpoint_state = 0
 
@@ -59,10 +59,11 @@ class RequestsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         time.sleep(RequestsHandler.REQUEST_SLEEP)
         if self.path == '/api/v1/health/sgx':
+            time.sleep(20)
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
         elif self.path == '/api/v1/health/schains':
-            time.sleep(10)
+            time.sleep(20)
             msg = self.get_msg(mq_schains)
             self._set_headers(code=200)
             if RequestsHandler.schains_state == 1 or msg == 'schains':
@@ -71,6 +72,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
             else:
                 response = {'status': 'ok', 'payload': {'schains': False}}
         elif self.path == '/api/v1/node/endpoint-info':
+            time.sleep(20)
             msg = self.get_msg(mq_endpoint)
             if RequestsHandler.endpoint_state == 1 or msg == 'endpoint':
                 RequestsHandler.endpoint_state = 1
@@ -103,7 +105,7 @@ def skale_api():
     p.terminate()
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
@@ -112,16 +114,17 @@ def test_api_spawner(skale_api):
 def run_request_concurrently(route):
     def make_request(url):
         try:
-            return requests.get(url, timeout=60)
+            r = requests.get(url, timeout=60)
+            return r.json()
         except Exception as e:
             logger.error('Request failed with %s', e)
             return None
 
-    good_url = compose_watchdog_url(route='/status/sgx')
+    url = compose_watchdog_url(route=route)
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
         futures = [
-            e.submit(make_request, good_url)
+            e.submit(make_request, url)
             for _ in range(CONCURRENT_REQ_NUMBER)
         ]
 
@@ -233,12 +236,10 @@ def test_changing_request(skale_api):
 
 def test_concurrent_request(skale_api):
     start_ts = timer()
-    result = run_request_concurrently(route='/status/sgx')
+    result = run_request_concurrently(route='/status/schains')
     ts_diff = timer() - start_ts
     for r in result:
-        assert r is not None
-        data = r.json()
-        assert data == {'data': {'sgx': 'ok'}, 'error': None}
+        assert r == {'data': {'schains': True}, 'error': None}
     assert ts_diff < 2
 
 
