@@ -26,8 +26,7 @@ from configs import HEALTHCHECKS_ROUTES
 
 from utils.healthchecks import (
     get_healthcheck_from_skale_api,
-    get_healthcheck_url,
-    request_all_healthchecks
+    get_healthcheck_url
 )
 from utils.cache import get_cache
 from utils.structures import construct_ok_response
@@ -144,9 +143,3 @@ def test_healthcheck_unknown_error(mock_get):
     assert res.status_code == HTTPStatus.BAD_REQUEST
     res_expected = f'{{"data": null, "error": "Could not get data from {route}. "}}'  # noqa
     assert res.response[0].decode("utf-8") == res_expected
-
-
-@mock.patch('utils.healthchecks.requests.get', side_effect=mocked_requests_get)
-def test_request_all_healthchecks(mock_get):
-    rcache = get_cache()
-    request_all_healthchecks(rcache)

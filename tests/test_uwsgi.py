@@ -16,14 +16,12 @@ from configs import DEFAULT_TASK_INTERVAL
 
 logger = logging.getLogger(__name__)
 
-
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
 COLD_START_TIMEOUT = 3 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
 CONCURRENT_REQ_NUMBER = 4
-
 
 thread_running = True
 
@@ -101,11 +99,13 @@ def skale_api():
     p = Process(target=serve_http_server)
     p.start()
     time.sleep(COLD_START_TIMEOUT)
+    ts = time.time()
+    logger.info('API started %d', ts)
     yield
     p.terminate()
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
