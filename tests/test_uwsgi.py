@@ -21,7 +21,6 @@ WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
 COLD_START_TIMEOUT = 3 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
-CONCURRENT_REQ_NUMBER = 4
 
 thread_running = True
 
@@ -105,13 +104,13 @@ def skale_api():
     p.terminate()
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
 
 
-def run_request_concurrently(route):
+def run_request_concurrently(routes):
     def make_request(url):
         try:
             r = requests.get(url, timeout=60)
@@ -120,12 +119,11 @@ def run_request_concurrently(route):
             logger.error('Request failed with %s', e)
             return None
 
-    url = compose_watchdog_url(route=route)
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
         futures = [
-            e.submit(make_request, url)
-            for _ in range(CONCURRENT_REQ_NUMBER)
+            e.submit(make_request, compose_watchdog_url(route))
+            for route in range(routes)
         ]
 
     results = [
@@ -169,39 +167,41 @@ def test_unsuccessfull_request(skale_api):
         assert data == {'data': None, 'error': 'Request to api/v1/node/meta-info failed, code: 400'}  # noqa
 
 
+@pytest.mark.skip
 def test_request_no_cache(skale_api):
     good_url = compose_watchdog_url(route='/status/sgx')
 
     with pytest.raises(TimeoutError):
         with in_time(seconds=2):
-            response = requests.get(
+            requests.get(
                 good_url,
                 json={'_no_cache': True},
-                timeout=120
+                timeout=150
             )
 
-    with in_time(seconds=50):
-        response = requests.get(
+    r = None
+    with in_time(seconds=150):
+        r = requests.get(
             good_url,
             json={'_no_cache': True},
-            timeout=120
+            timeout=150
         )
-        data = response.json()
-        assert data == {'data': {'sgx': 'ok'}, 'error': None}
+    data = r.json()
+    assert data == {'data': {'sgx': 'ok'}, 'error': None}
 
     bad_url = compose_watchdog_url(route='/status/meta-info')
 
     with pytest.raises(TimeoutError):
         with in_time(seconds=2):
-            response = requests.get(
+            requests.get(
                 bad_url,
                 json={'_no_cache': True},
-                timeout=120
+                timeout=150
             )
 
-    with in_time(seconds=50):
-        response = requests.get(bad_url, json={'_no_cache': True}, timeout=60)
-        data = response.json()
+    with in_time(seconds=150):
+        r = requests.get(bad_url, json={'_no_cache': True}, timeout=150)
+        data = r.json()
         assert data == {'data': None, 'error': 'Request to api/v1/node/meta-info failed, code: 400'}  # noqa
 
 
@@ -234,13 +234,44 @@ def test_changing_request(skale_api):
         assert data == {'data': {'endpoint': True}, 'error': None}
 
 
-def test_concurrent_request(skale_api):
+def test_concurrent_request_one_endpoint(skale_api):
     start_ts = timer()
-    result = run_request_concurrently(route='/status/schains')
+    routes = ['/status/sgx', '/status/sgx', '/status/sgx', '/status/sgx']
+    result = run_request_concurrently(routes)
     ts_diff = timer() - start_ts
-    for r in result:
-        assert r == {'data': {'schains': True}, 'error': None}
+    assert any(r is not None for r in result)
+    print(result)
+    assert any(r == {} for r in result), result
     assert ts_diff < 2
+
+
+def test_concurrent_request_all_endpoints(skale_api):
+    start_ts = timer()
+    routes_a = [
+        '/status/core',
+        '/status/sgx',
+        '/status/schains',
+        '/status/hardware'
+    ]
+    routes_b = [
+        '/status/endpoint',
+        '/status/schain-containers-versions',
+        '/status/meta-info',
+        '/status/btrfs'
+    ]
+
+    routes_c = [
+        '/status/ssl',
+        '/status/ima',
+        '/status/public-ip',
+        '/status/validator-nodes'
+    ]
+
+    for chunk in [routes_a, routes_b, routes_c]:
+        result = run_request_concurrently(chunk)
+        ts_diff = timer() - start_ts
+        assert any(r is not None for r in result), chunk
+        assert ts_diff < 2, chunk
 
 
 if __name__ == '__main__':

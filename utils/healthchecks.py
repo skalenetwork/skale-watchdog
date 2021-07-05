@@ -37,11 +37,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_healthcheck_from_skale_api(
-    route,
+    check,
     rcache=None,
     no_cache=False,
     params=None
 ):
+    route = HEALTHCHECKS_ROUTES[check]
     if not no_cache:
         rcache = rcache or get_cache()
         cached_response = SkaleApiResponse.from_bytes(
@@ -77,7 +78,7 @@ def request_healthcheck_from_skale_api(route, task=None, params=None):
 
     if response.status_code != requests.codes.ok:
         err_msg = f'Request to {route} failed, code: {response.status_code}'
-        logger.error(f'[TASK {task}] err_msg')
+        logger.error(f'[TASK {task}] {err_msg}')
         return construct_err_response(response.status_code, err_msg)
 
     res = response.json()
