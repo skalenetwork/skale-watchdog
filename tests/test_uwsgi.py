@@ -104,7 +104,7 @@ def skale_api():
     p.terminate()
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
     pass
