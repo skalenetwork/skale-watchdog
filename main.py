@@ -25,7 +25,6 @@ from flask import Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
 import utils.background_tasks  # noqa
-from configs import HEALTHCHECKS_ROUTES
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.healthchecks import get_healthcheck_from_skale_api
 from utils.log import init_default_logger
