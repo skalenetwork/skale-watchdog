@@ -30,7 +30,7 @@ from configs import (
     HEALTHCHECKS_ROUTES,
     SIGNAL_OFFSET
 )
-from utils.healthchecks import request_health
+from utils.healthchecks import update_check_cache
 from utils.log import init_default_logger
 
 
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 def task(num, route):
     logger.info('[TASK %d] Started', num)
     start = timer()
-    request_health(route, task=num)
+    update_check_cache(route, task=num)
     elapsed = int(timer() - start)
     logger.info('[TASK %d] Finished, elapsed time %ds', num, elapsed)
 

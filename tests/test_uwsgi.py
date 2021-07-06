@@ -246,7 +246,7 @@ def test_concurrent_request_one_endpoint(skale_api):
         r[0] == {'data': {'sgx': 'ok'}, 'error': None}
         for r in result
     ), result
-    assert ts_diff < 2
+    assert ts_diff < 4
 
 
 def test_concurrent_request_all_endpoints(skale_api):

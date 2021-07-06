@@ -36,13 +36,22 @@ from utils.structures import (
 logger = logging.getLogger(__name__)
 
 
-def get_healthcheck_from_skale_api(
+def get_healthcheck_result(
     check,
     rcache=None,
     no_cache=False,
     params=None
 ):
     route = HEALTHCHECKS_ROUTES[check]
+    return get_result_by_route(
+        route,
+        rcache=rcache,
+        no_cache=no_cache,
+        params=params
+    )
+
+
+def get_result_by_route(route, rcache=None, no_cache=False, params=None):
     if not no_cache:
         rcache = rcache or get_cache()
         cached_response = SkaleApiResponse.from_bytes(
@@ -110,7 +119,7 @@ def healthcheck_urls_from_routes():
     )
 
 
-def request_health(
+def update_check_cache(
     check: str,
     task: Optional[str] = None,
     rcache: Cache = None

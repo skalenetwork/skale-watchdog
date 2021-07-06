@@ -26,7 +26,7 @@ from werkzeug.exceptions import InternalServerError
 
 import utils.background_tasks  # noqa
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.healthchecks import get_healthcheck_from_skale_api
+from utils.healthchecks import get_healthcheck_result
 from utils.log import init_default_logger
 from utils.structures import construct_err_response
 
@@ -65,7 +65,7 @@ def containers_core_status():
     params = {
         'all': 'True'
     }
-    return get_healthcheck_from_skale_api(
+    return get_healthcheck_result(
         'containers',
         no_cache=cold,
         params=params
@@ -77,7 +77,7 @@ def sgx_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('sgx', no_cache=cold)
+    return get_healthcheck_result('sgx', no_cache=cold)
 
 
 @app.route('/status/schains', methods=['GET'])
@@ -85,7 +85,7 @@ def schains_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('schains', no_cache=cold)
+    return get_healthcheck_result('schains', no_cache=cold)
 
 
 @app.route('/status/hardware', methods=['GET'])
@@ -93,7 +93,7 @@ def hardware_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('hardware', no_cache=cold)
+    return get_healthcheck_result('hardware', no_cache=cold)
 
 
 @app.route('/status/endpoint', methods=['GET'])
@@ -101,7 +101,7 @@ def endpoint_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('endpoint', no_cache=cold)
+    return get_healthcheck_result('endpoint', no_cache=cold)
 
 
 @app.route('/status/schain-containers-versions', methods=['GET'])
@@ -109,7 +109,7 @@ def schain_containers_versions_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('schain_versions', no_cache=cold)
+    return get_healthcheck_result('schain_versions', no_cache=cold)
 
 
 @app.route('/status/meta-info', methods=['GET'])
@@ -117,7 +117,7 @@ def meta_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('meta', no_cache=cold)
+    return get_healthcheck_result('meta', no_cache=cold)
 
 
 @app.route('/status/btrfs', methods=['GET'])
@@ -125,7 +125,7 @@ def btrfs_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('btrfs', no_cache=cold)
+    return get_healthcheck_result('btrfs', no_cache=cold)
 
 
 @app.route('/status/ssl', methods=['GET'])
@@ -133,7 +133,7 @@ def ssl_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('ssl', no_cache=cold)
+    return get_healthcheck_result('ssl', no_cache=cold)
 
 
 @app.route('/status/ima', methods=['GET'])
@@ -141,7 +141,7 @@ def ima_status():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('ima', no_cache=cold)
+    return get_healthcheck_result('ima', no_cache=cold)
 
 
 @app.route('/status/public-ip', methods=['GET'])
@@ -149,7 +149,7 @@ def public_ip():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('public-ip', no_cache=cold)
+    return get_healthcheck_result('public-ip', no_cache=cold)
 
 
 @app.route('/status/validator-nodes', methods=['GET'])
@@ -157,7 +157,7 @@ def validator_nodes():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_from_skale_api('validator-nodes', no_cache=cold)
+    return get_healthcheck_result('validator-nodes', no_cache=cold)
 
 
 if __name__ == '__main__':
