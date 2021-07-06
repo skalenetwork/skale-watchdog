@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 API_PORT = 3007
 WATCHDOG_PORT = 3009
 BASE_HOST = '127.0.0.1'
-COLD_START_TIMEOUT = 3 * DEFAULT_TASK_INTERVAL
+COLD_START_TIMEOUT = 5 * DEFAULT_TASK_INTERVAL
 MAX_WORKERS = 50
 
 thread_running = True
@@ -110,28 +110,6 @@ def test_api_spawner(skale_api):
     pass
 
 
-def run_request_concurrently(routes):
-    def make_request(url):
-        try:
-            r = requests.get(url, timeout=60)
-            return r.json()
-        except Exception as e:
-            logger.error('Request failed with %s', e)
-            return None
-
-    futures = []
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
-        futures = [
-            e.submit(make_request, compose_watchdog_url(route))
-            for route in range(routes)
-        ]
-
-    results = [
-        future.result() for future in as_completed(futures)
-    ]
-    return results
-
-
 @contextmanager
 def in_time(seconds):
     start_ts = timer()
@@ -139,6 +117,29 @@ def in_time(seconds):
     ts_diff = timer() - start_ts
     if ts_diff > seconds:
         raise TimeoutError(f'Operation executed {ts_diff}s > {seconds}s')
+
+
+def run_request_concurrently(routes):
+    def make_request(url):
+        try:
+            with in_time(3):
+                r = requests.get(url, timeout=120)
+                return r.json(), url
+        except Exception as e:
+            logger.error('Request failed with %s', e)
+            return None, url
+
+    futures = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
+        futures = [
+            e.submit(make_request, compose_watchdog_url(route=route))
+            for route in routes
+        ]
+
+    results = [
+        future.result() for future in as_completed(futures)
+    ]
+    return results
 
 
 def test_successfull_request(skale_api):
@@ -241,12 +242,14 @@ def test_concurrent_request_one_endpoint(skale_api):
     ts_diff = timer() - start_ts
     assert any(r is not None for r in result)
     print(result)
-    assert any(r == {} for r in result), result
+    assert any(
+        r[0] == {'data': {'sgx': 'ok'}, 'error': None}
+        for r in result
+    ), result
     assert ts_diff < 2
 
 
 def test_concurrent_request_all_endpoints(skale_api):
-    start_ts = timer()
     routes_a = [
         '/status/core',
         '/status/sgx',
@@ -268,10 +271,13 @@ def test_concurrent_request_all_endpoints(skale_api):
     ]
 
     for chunk in [routes_a, routes_b, routes_c]:
+        start_ts = timer()
         result = run_request_concurrently(chunk)
         ts_diff = timer() - start_ts
-        assert any(r is not None for r in result), chunk
-        assert ts_diff < 2, chunk
+        for r in result:
+            v, u = r
+            assert v is not None, r
+        assert ts_diff < 4
 
 
 if __name__ == '__main__':

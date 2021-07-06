@@ -31,6 +31,10 @@ from configs import (
     SIGNAL_OFFSET
 )
 from utils.healthchecks import request_health
+from utils.log import init_default_logger
+
+
+init_default_logger()
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +55,7 @@ def init_tasks():
     logger.info('Initializing backgound tasks')
     for i, check in enumerate(HEALTHCHECKS_ROUTES):
         num = SIGNAL_OFFSET + i
-        logger.info('Adding task %d %s', i, check)
+        logger.info('Adding task %d %s', num, check)
         uwsgi.register_signal(num, 'spooler', make_background_task(check))
         interval = DEFAULT_TASK_INTERVAL
         if check == 'schains':
