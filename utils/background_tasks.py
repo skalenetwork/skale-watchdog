@@ -30,29 +30,33 @@ from configs import (
     HEALTHCHECKS_ROUTES,
     SIGNAL_OFFSET
 )
-from utils.healthchecks import request_health
+from utils.healthchecks import update_check_cache
+from utils.log import init_default_logger
+
+
+init_default_logger()
 
 logger = logging.getLogger(__name__)
 
 
-def task(num, route, mode):
+def task(num, route):
     logger.info('[TASK %d] Started', num)
     start = timer()
-    request_health(route, mode)
+    update_check_cache(route, task=num)
     elapsed = int(timer() - start)
     logger.info('[TASK %d] Finished, elapsed time %ds', num, elapsed)
 
 
 def make_background_task(route):
-    return partial(task, route=route, mode='background')
+    return partial(task, route=route)
 
 
 def init_tasks():
     logger.info('Initializing backgound tasks')
     for i, check in enumerate(HEALTHCHECKS_ROUTES):
         num = SIGNAL_OFFSET + i
-        logger.info('Adding task %d %s', i, check)
-        uwsgi.register_signal(num, 'worker', make_background_task(check))
+        logger.info('Adding task %d %s', num, check)
+        uwsgi.register_signal(num, 'spooler', make_background_task(check))
         interval = DEFAULT_TASK_INTERVAL
         if check == 'schains':
             interval *= 2
