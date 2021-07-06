@@ -209,7 +209,7 @@ def test_request_no_cache(skale_api):
 def test_changing_request(skale_api):
     schains_url = compose_watchdog_url(route='/status/schains')
     endpoint_url = compose_watchdog_url(route='/status/endpoint')
-    time.sleep(70)
+    time.sleep(120)
 
     with in_time(seconds=2):
         response = requests.get(schains_url, timeout=60)
@@ -223,7 +223,7 @@ def test_changing_request(skale_api):
 
     mq_schains.put('schains')
     mq_endpoint.put('endpoint')
-    time.sleep(125)
+    time.sleep(250)
     with in_time(seconds=2):
         response = requests.get(schains_url, timeout=60)
         data = response.json()
