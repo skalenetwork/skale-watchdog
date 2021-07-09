@@ -18,20 +18,20 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import hashlib
+import logging
 import re
 import sys
-import logging
 
 
 HIDING_PATTERNS = [
     r'NEK\:\w+',
-    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
-    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',  # noqa
+    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'  # noqa
 ]
 
 
 class HidingFormatter:
-    def __init__(self, base_formatter, patterns):
+    def __init__(self, base_formatter, patterns=HIDING_PATTERNS):
         self.base_formatter = base_formatter
         self._patterns = patterns
 
@@ -53,7 +53,7 @@ class HidingFormatter:
 def init_default_logger():  # pragma: no cover
     handlers = []
     base_formatter = logging.Formatter(
-        '[%(asctime)s %(levelname)s] %(name)s:%(lineno)d - %(threadName)s - %(message)s'  # noqa
+        '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
     )
     formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
 

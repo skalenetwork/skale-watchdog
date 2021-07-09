@@ -17,10 +17,10 @@ services:
       context: "."
       dockerfile: Dockerfile
     network_mode: host
+    cpus: "0.5"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       FLASK_APP_PORT: 3010
       FLASK_APP_HOST: "127.0.0.1"
       FLASK_DEBUG_MODE: "False"
-      JOB_INTERVAL: ${JOB_INTERVAL}

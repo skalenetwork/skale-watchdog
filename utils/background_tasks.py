@@ -19,24 +19,50 @@
 
 
 import logging
+from functools import partial
 from timeit import default_timer as timer
 
-from uwsgidecorators import cron
+import uwsgi
 
-from configs import CRON_SCHEDULE
-from utils.healthchecks import request_all_healthchecks
-from utils.cache import get_cache
+from configs import (
+    DEFAULT_TASK_INTERVAL,
+    DISABLE_BACKGROUND,
+    HEALTHCHECKS_ROUTES,
+    SIGNAL_OFFSET
+)
+from utils.healthchecks import update_check_cache
+from utils.log import init_default_logger
 
+
+init_default_logger()
 
 logger = logging.getLogger(__name__)
 
-rcache = get_cache()
 
-
-@cron(*CRON_SCHEDULE)
-def cronjob(num):
-    logger.info('Background job started')
+def task(num, route):
+    logger.info('[TASK %d] Started', num)
     start = timer()
-    request_all_healthchecks(rcache)
+    update_check_cache(route, task=num)
     elapsed = int(timer() - start)
-    logger.info(f'Background job finished, elapsed time {elapsed}s')
+    logger.info('[TASK %d] Finished, elapsed time %ds', num, elapsed)
+
+
+def make_background_task(route):
+    return partial(task, route=route)
+
+
+def init_tasks():
+    logger.info('Initializing backgound tasks')
+    for i, check in enumerate(HEALTHCHECKS_ROUTES):
+        num = SIGNAL_OFFSET + i
+        logger.info('Adding task %d %s', num, check)
+        uwsgi.register_signal(num, 'spooler', make_background_task(check))
+        interval = DEFAULT_TASK_INTERVAL
+        if check == 'schains':
+            interval *= 2
+        uwsgi.add_timer(num, interval)
+    logger.info('Background tasks initialized')
+
+
+if not DISABLE_BACKGROUND:
+    init_tasks()
