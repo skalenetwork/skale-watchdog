@@ -25,7 +25,7 @@ HEALTHCHECKS_ROUTES = {
     'endpoint': get_api_url('node', 'endpoint-info'),
     'meta': get_api_url('node', 'meta-info'),
     'schain_versions': get_api_url('schains', 'container-versions'),
-    'btrfs': get_api_url('node', 'btrfs'),
+    'btrfs': get_api_url('node', 'btrfs-info'),
     'ssl': get_api_url('ssl', 'status'),
     'public-ip': get_api_url('node', 'public-ip'),
     'validator-nodes': get_api_url('node', 'validator-nodes')
