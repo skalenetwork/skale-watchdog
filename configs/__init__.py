@@ -7,30 +7,33 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 API_HOST = 'localhost'
 API_PORT = '3007'
 
+API_PREFIX = 'api'
+CURRENT_API_VERSION = 'v1'
+API_VERSION_PREFIX = os.path.join(API_PREFIX, CURRENT_API_VERSION)
+
+
+def get_api_url(group_name, method_name):
+    return os.path.join(API_VERSION_PREFIX, group_name, method_name)
+
+
 HEALTHCHECKS_ROUTES = {
-    'containers': 'healthchecks/containers',
-    'sgx': 'api/sgx/info',
-    'schains': 'api/schains/healthchecks',
-    'hardware': 'hardware',
-    'endpoint': 'endpoint-info',
-    'schain_versions': 'schain-containers-versions',
-    'meta': 'meta-info',
-    'btrfs': 'btrfs-info',
-    'ssl': 'api/ssl/status',
-    'public_ip': '/api/v1/node/public-ip',
-    'validator-nodes': 'api/v1/health/validator-nodes'
+    'containers': get_api_url('health', 'containers'),
+    'sgx': get_api_url('health', 'sgx'),
+    'schains': get_api_url('health', 'schains'),
+    'ima': get_api_url('health', 'ima'),
+    'hardware': get_api_url('node', 'hardware'),
+    'endpoint': get_api_url('node', 'endpoint-info'),
+    'meta': get_api_url('node', 'meta-info'),
+    'schain_versions': get_api_url('schains', 'container-versions'),
+    'btrfs': get_api_url('node', 'btrfs-info'),
+    'ssl': get_api_url('ssl', 'status'),
+    'public-ip': get_api_url('node', 'public-ip'),
+    'validator-nodes': get_api_url('node', 'validator-nodes')
 }
 
 API_TIMEOUT = 1000  # in seconds
-
-JOB_INTERVAL = int(os.getenv('JOB_INTERVAL', 480))
-
-CRON_SCHEDULE = [
-    -(JOB_INTERVAL // 60),
-    -1,
-    -1,
-    -1,
-    -1
-]  # Every 8 minutes by default
+DEFAULT_TASK_INTERVAL = 60
+SIGNAL_OFFSET = 20
+DISABLE_BACKGROUND = bool(os.getenv('DISABLE_BACKGROUND') or False)
 
 ENV = os.getenv('ENV')
