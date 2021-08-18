@@ -20,6 +20,9 @@ Node CLI automatically opens port 3009 on the machine using iptables. Be sure th
 * xref:meta-info[/status/meta-info]
 * xref:btrfs[/status/btrfs]
 * xref:ssl[/status/ssl]
+* xref:ima[/status/ima]
+* xref:public-ip[/status/public-ip]
+* xref:validator-nodes[/status/validator-nodes]
 
 [[core]]
 === /status/core
@@ -187,4 +190,63 @@ Returns key-cert pair validity.
 
 ```shell
 $ curl http://YOUR_SKALE_NODE_IP:3009/status/ssl
+```
+
+==== Example Response
+
+```json
+{"data": {"issued_to": "skale.network.cloud", "expiration_date": "2021-11-08T17:45:04"}, "error": null}
+```
+
+[[ima]]
+=== /status/ima
+
+==== Description
+
+Returns the status of the IMA container.
+
+=== Usage
+
+```shell
+$ curl http://YOUR_SKALE_NODE_IP:3009/status/ima
+```
+
+==== Example Response
+
+```json
+{"data": [{"skale-chain-name": {"error": "IMA docker container is not running", "last_ima_errors": []}}], "error": null}
+```
+
+[[public-ip]]
+=== /status/public-ip
+
+==== Description
+
+==== Usage
+
+```shell
+$ curl http://YOUR_SKALE_NODE_IP:3009/status/public-ip
+```
+
+==== Example Response
+
+```json
+{"data": {"public_ip": "1.2.3.4"}, "error": null}
+```
+
+[[validator-nodes]]
+=== /status/validator-nodes
+
+==== Description
+
+==== Usage
+
+```shell
+$ curl http://YOUR_SKALE_NODE_IP:3009/status/validator-nodes
+```
+
+==== Example Response
+
+```json
+{"data": [[1, "1.2.3.4", true], [2, "1.2.3.5", false]], "error": null}
 ```

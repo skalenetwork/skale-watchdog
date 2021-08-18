@@ -1,5 +1,5 @@
 name: skale-watchdog
 title: Watchdog
-version: 1.1.x
+version: 2.0.x
 nav:
   - modules/ROOT/nav.adoc
