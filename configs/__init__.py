@@ -28,7 +28,8 @@ HEALTHCHECKS_ROUTES = {
     'btrfs': get_api_url('node', 'btrfs-info'),
     'ssl': get_api_url('ssl', 'status'),
     'public-ip': get_api_url('node', 'public-ip'),
-    'validator-nodes': get_api_url('node', 'validator-nodes')
+    'validator-nodes': get_api_url('node', 'validator-nodes'),
+    'check-report': get_api_url('health', 'check-report')
 }
 
 API_TIMEOUT = 1000  # in seconds

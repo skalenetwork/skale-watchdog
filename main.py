@@ -160,6 +160,14 @@ def validator_nodes():
     return get_healthcheck_result('validator-nodes', no_cache=cold)
 
 
+@app.route('/status/check-report', methods=['GET'])
+def check_report():
+    logger.debug(request)
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_result('check-report', no_cache=cold)
+
+
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
