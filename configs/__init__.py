@@ -4,7 +4,7 @@ import os
 LONG_LINE = '=' * 100
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-API_HOST = 'localhost'
+API_HOST = 'api'
 API_PORT = '3007'
 
 API_PREFIX = 'api'
@@ -17,7 +17,7 @@ def get_api_url(group_name, method_name):
 
 
 HEALTHCHECKS_ROUTES = {
-    'containers': get_api_url('health', 'containers'),
+    'containers': get_api_url('health', 'containers?all=True'),
     'sgx': get_api_url('health', 'sgx'),
     'schains': get_api_url('health', 'schains'),
     'ima': get_api_url('health', 'ima'),
