@@ -17,7 +17,7 @@ def get_api_url(group_name, method_name):
 
 
 HEALTHCHECKS_ROUTES = {
-    'containers': get_api_url('health', 'containers'),
+    'containers': get_api_url('health', 'containers?all=True'),
     'sgx': get_api_url('health', 'sgx'),
     'schains': get_api_url('health', 'schains'),
     'ima': get_api_url('health', 'ima'),
