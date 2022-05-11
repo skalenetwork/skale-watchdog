@@ -168,6 +168,14 @@ def check_report():
     return get_healthcheck_result('check-report', no_cache=cold)
 
 
+@app.route('/status/abi', methods=['GET'])
+def abi_hash():
+    logger.debug(request)
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_result('abi', no_cache=cold)
+
+
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
     app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,

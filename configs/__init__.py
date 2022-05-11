@@ -29,7 +29,8 @@ HEALTHCHECKS_ROUTES = {
     'ssl': get_api_url('ssl', 'status'),
     'public-ip': get_api_url('node', 'public-ip'),
     'validator-nodes': get_api_url('node', 'validator-nodes'),
-    'check-report': get_api_url('health', 'check-report')
+    'check-report': get_api_url('health', 'check-report'),
+    'abi': get_api_url('node', 'abi')
 }
 
 API_TIMEOUT = 1000  # in seconds
