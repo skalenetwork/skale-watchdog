@@ -168,12 +168,20 @@ def check_report():
     return get_healthcheck_result('check-report', no_cache=cold)
 
 
-@app.route('/status/abi', methods=['GET'])
-def abi_hash():
+@app.route('/status/sm_abi', methods=['GET'])
+def sm_abi_hash():
     logger.debug(request)
     options = request.json
     cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('abi', no_cache=cold)
+    return get_healthcheck_result('sm_abi', no_cache=cold)
+
+
+@app.route('/status/ima_abi', methods=['GET'])
+def ima_abi_hash():
+    logger.debug(request)
+    options = request.json
+    cold = options.get('_no_cache', False) if options else False
+    return get_healthcheck_result('ima_abi', no_cache=cold)
 
 
 if __name__ == '__main__':
