@@ -19,8 +19,9 @@
 
 import logging
 import time
+from functools import wraps
 
-
+import flask
 from flask import Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
@@ -37,6 +38,18 @@ app = Flask(__name__)
 app.port = FLASK_APP_PORT
 app.host = FLASK_APP_HOST
 app.use_reloader = False
+
+
+def healthcheck(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        logger.debug('Incoming request %s', request)
+        data = request.data or '{}'
+        g.options = flask.json.loads(data)
+        logger.debug('%s, options: %s', request, g.options)
+        g.cold = g.options.get('_no_cache', False) if g.options else False
+        return func(*args, **kwargs)
+    return wrapper
 
 
 @app.before_request
@@ -58,130 +71,98 @@ def handle_500(e):
 
 
 @app.route('/status/core', methods=['GET'])
-def containers_core_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    params = {
-        'all': 'True'
-    }
+@healthcheck
+def containers_core_status(options, cold):
+    params = {'all': 'True'}
     return get_healthcheck_result(
         'containers',
-        no_cache=cold,
+        no_cache=g.cold,
         params=params
     )
 
 
 @app.route('/status/sgx', methods=['GET'])
+@healthcheck
 def sgx_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('sgx', no_cache=cold)
+    return get_healthcheck_result('sgx', no_cache=g.cold)
 
 
 @app.route('/status/schains', methods=['GET'])
+@healthcheck
 def schains_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('schains', no_cache=cold)
+    return get_healthcheck_result('schains', no_cache=g.cold)
 
 
 @app.route('/status/hardware', methods=['GET'])
+@healthcheck
 def hardware_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('hardware', no_cache=cold)
+    return get_healthcheck_result('hardware', no_cache=g.cold)
 
 
 @app.route('/status/endpoint', methods=['GET'])
+@healthcheck
 def endpoint_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('endpoint', no_cache=cold)
+    return get_healthcheck_result('endpoint', no_cache=g.cold)
 
 
 @app.route('/status/schain-containers-versions', methods=['GET'])
+@healthcheck
 def schain_containers_versions_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('schain_versions', no_cache=cold)
+    return get_healthcheck_result('schain_versions', no_cache=g.cold)
 
 
 @app.route('/status/meta-info', methods=['GET'])
+@healthcheck
 def meta_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('meta', no_cache=cold)
+    return get_healthcheck_result('meta', no_cache=g.cold)
 
 
 @app.route('/status/btrfs', methods=['GET'])
+@healthcheck
 def btrfs_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('btrfs', no_cache=cold)
+    return get_healthcheck_result('btrfs', no_cache=g.cold)
 
 
 @app.route('/status/ssl', methods=['GET'])
+@healthcheck
 def ssl_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('ssl', no_cache=cold)
+    return get_healthcheck_result('ssl', no_cache=g.cold)
 
 
 @app.route('/status/ima', methods=['GET'])
+@healthcheck
 def ima_status():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('ima', no_cache=cold)
+    return get_healthcheck_result('ima', no_cache=g.cold)
 
 
 @app.route('/status/public-ip', methods=['GET'])
+@healthcheck
 def public_ip():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('public-ip', no_cache=cold)
+    return get_healthcheck_result('public-ip', no_cache=g.cold)
 
 
 @app.route('/status/validator-nodes', methods=['GET'])
+@healthcheck
 def validator_nodes():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('validator-nodes', no_cache=cold)
+    return get_healthcheck_result('validator-nodes', no_cache=g.cold)
 
 
 @app.route('/status/check-report', methods=['GET'])
+@healthcheck
 def check_report():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('check-report', no_cache=cold)
+    return get_healthcheck_result('check-report', no_cache=g.cold)
 
 
 @app.route('/status/sm_abi', methods=['GET'])
+@healthcheck
 def sm_abi_hash():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('sm_abi', no_cache=cold)
+    return get_healthcheck_result('sm_abi', no_cache=g.cold)
 
 
 @app.route('/status/ima_abi', methods=['GET'])
+@healthcheck
 def ima_abi_hash():
-    logger.debug(request)
-    options = request.json
-    cold = options.get('_no_cache', False) if options else False
-    return get_healthcheck_result('ima_abi', no_cache=cold)
+    return get_healthcheck_result('ima_abi', no_cache=g.cold)
 
 
 if __name__ == '__main__':

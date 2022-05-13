@@ -107,7 +107,6 @@ def skale_api():
 @pytest.mark.skip
 def test_api_spawner(skale_api):
     time.sleep(5000)
-    pass
 
 
 @contextmanager
