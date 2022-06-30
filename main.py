@@ -153,16 +153,16 @@ def check_report():
     return get_healthcheck_result('check-report', no_cache=g.cold)
 
 
-@app.route('/status/sm_abi', methods=['GET'])
+@app.route('/status/sm-abi', methods=['GET'])
 @healthcheck
 def sm_abi_hash():
-    return get_healthcheck_result('sm_abi', no_cache=g.cold)
+    return get_healthcheck_result('sm-abi', no_cache=g.cold)
 
 
-@app.route('/status/ima_abi', methods=['GET'])
+@app.route('/status/ima-abi', methods=['GET'])
 @healthcheck
 def ima_abi_hash():
-    return get_healthcheck_result('ima_abi', no_cache=g.cold)
+    return get_healthcheck_result('ima-abi', no_cache=g.cold)
 
 
 if __name__ == '__main__':
