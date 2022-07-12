@@ -72,7 +72,7 @@ def handle_500(e):
 
 @app.route('/status/core', methods=['GET'])
 @healthcheck
-def containers_core_status(options, cold):
+def containers_core_status():
     params = {'all': 'True'}
     return get_healthcheck_result(
         'containers',
