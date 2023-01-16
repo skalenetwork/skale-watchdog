@@ -26,8 +26,9 @@ from flask import Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
 import utils.background_tasks  # noqa
+from configs import INFO_ROUTES
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.healthchecks import get_healthcheck_result
+from utils.healthchecks import get_healthcheck_result, send_request_to_skale_api
 from utils.log import init_default_logger
 from utils.structures import construct_err_response
 
@@ -164,6 +165,29 @@ def sm_abi_hash():
 @healthcheck
 def ima_abi_hash():
     return get_healthcheck_result('ima-abi', no_cache=g.cold)
+
+
+@app.route('/status/tm-tx', methods=['GET'])
+def tm_tx():
+    return send_request_to_skale_api(
+        INFO_ROUTES['tm-tx'],
+        params=request.json
+    ).to_flask_response()
+
+
+@app.route('/status/tm-pool-size', methods=['GET'])
+def tm_pool_size():
+    return send_request_to_skale_api(
+        INFO_ROUTES['tm-pool-size']
+    ).to_flask_response()
+
+
+@app.route('/status/tm-pool-records', methods=['GET'])
+def tm_pool_records():
+    return send_request_to_skale_api(
+        INFO_ROUTES['tm-pool-records'],
+        params=request.json
+    ).to_flask_response()
 
 
 if __name__ == '__main__':

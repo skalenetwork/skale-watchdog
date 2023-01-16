@@ -34,6 +34,13 @@ HEALTHCHECKS_ROUTES = {
     'ima-abi': get_api_url('node', 'ima-abi')
 }
 
+INFO_ROUTES = {
+    'tm-pool-size': get_api_url('node', 'tm-pool-size'),
+    'tm-pool-records': get_api_url('node', 'tm-pool-records'),
+    'tm-tx': get_api_url('node', 'tm-tx')
+}
+
+
 API_TIMEOUT = 1000  # in seconds
 DEFAULT_TASK_INTERVAL = 60
 SIGNAL_OFFSET = 20
