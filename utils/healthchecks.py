@@ -60,7 +60,7 @@ def get_result_by_route(route, rcache=None, no_cache=False, params=None):
     else:
         logger.info(f'API request for {route}: no cache mode is enabled')
         cached_response = None
-    response = cached_response or request_healthcheck_from_skale_api(
+    response = cached_response or send_request_to_skale_api(
         route, params=params)
     if cached_response:
         logger.info(f'API request for {route}: cached response founded')
@@ -71,11 +71,11 @@ def get_result_by_route(route, rcache=None, no_cache=False, params=None):
     return response.to_flask_response()
 
 
-def request_healthcheck_from_skale_api(route, task=None, params=None):
+def send_request_to_skale_api(route, task=None, params=None):
     url = get_healthcheck_url(route)
     logger.info(f'[TASK {task}] Requesting data from {url}')
     try:
-        response = requests.get(url, timeout=API_TIMEOUT, params=params)
+        response = requests.get(url, timeout=API_TIMEOUT, json=params)
     except requests.exceptions.ConnectionError as err:
         err_msg = f'Could not connect to {route}'
         logger.error(f'[TASK {task}] {err_msg}. {err}')
@@ -126,7 +126,7 @@ def update_check_cache(
 ):
     rcache = rcache or get_cache()
     route = HEALTHCHECKS_ROUTES[check]
-    response = request_healthcheck_from_skale_api(route, task=task)
+    response = send_request_to_skale_api(route, task=task)
     r = rcache.update_item(route, response.to_bytes())
     if not r:
         logger.error(f'[TASK {task}] Updating cache item for {check} failed')
