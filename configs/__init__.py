@@ -40,3 +40,5 @@ SIGNAL_OFFSET = 20
 DISABLE_BACKGROUND = bool(os.getenv('DISABLE_BACKGROUND') or False)
 
 ENV = os.getenv('ENV')
+ENDPOINT = os.getenv('ENDPOINT')
+SGX_SERVER_URL = os.getenv('SGX_SERVER_URL')
