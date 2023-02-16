@@ -67,6 +67,7 @@ def teardown_request(response):
 @app.errorhandler(InternalServerError)
 def handle_500(e):
     original = getattr(e, "original_exception", None)
+    logger.exception('Request failed with error %s', original)
     return construct_err_response(status=500, err=original).to_flask_response()
 
 

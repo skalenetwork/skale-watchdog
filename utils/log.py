@@ -17,46 +17,64 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import hashlib
 import logging
 import re
 import sys
+from urllib.parse import urlparse
+
+from flask import has_request_context, request
+from configs import ENDPOINT, SGX_SERVER_URL
+
+LOG_FORMAT = '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
 
 
-HIDING_PATTERNS = [
-    r'NEK\:\w+',
-    r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',  # noqa
-    r'ws[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',  # noqa
-    r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'  # noqa
-]
+def compose_hiding_patterns():
+    sgx_ip = urlparse(SGX_SERVER_URL).hostname
+    eth_ip = urlparse(ENDPOINT).hostname
+    return {
+        rf'{sgx_ip}': '[SGX_IP]',
+        rf'{eth_ip}': '[ETH_IP]',
+        r'NEK\:\w+': '[SGX_KEY]'
+    }
 
 
-class HidingFormatter:
-    def __init__(self, base_formatter, patterns=HIDING_PATTERNS):
-        self.base_formatter = base_formatter
-        self._patterns = patterns
-
-    @classmethod
-    def convert_match_to_sha3(cls, match):
-        return hashlib.sha3_256(match.group(0).encode('utf-8')).digest().hex()
-
+class RequestFormatter(logging.Formatter):
     def format(self, record):
-        msg = self.base_formatter.format(record)
-        for pattern in self._patterns:
-            pat = re.compile(pattern)
-            msg = pat.sub(self.convert_match_to_sha3, msg)
+        if not isinstance(record, str):
+            if has_request_context():
+                record.url = request.full_path[:-1]
+            else:
+                record.url = None
+        return super().format(record)
+
+
+class HidingFormatter(RequestFormatter):
+    def __init__(self, log_format: str, patterns: dict) -> None:
+        super().__init__(log_format)
+        self._patterns: dict = patterns
+
+    def _filter_sensitive(self, msg) -> str:
+        for match, replacement in self._patterns.items():
+            pat = re.compile(match)
+            msg = pat.sub(replacement, msg)
         return msg
 
-    def __getattr__(self, attr):
-        return getattr(self.base_formatter, attr)
+    def format(self, record) -> str:
+        msg = super().format(record)
+        return self._filter_sensitive(msg)
+
+    def formatException(self, exc_info) -> str:
+        msg = super().formatException(exc_info)
+        return self._filter_sensitive(msg)
+
+    def formatStack(self, stack_info) -> str:
+        msg = super().formatStack(stack_info)
+        return self._filter_sensitive(msg)
 
 
 def init_default_logger():  # pragma: no cover
     handlers = []
-    base_formatter = logging.Formatter(
-        '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
-    )
-    formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
+    formatter = HidingFormatter(LOG_FORMAT, compose_hiding_patterns())
 
     stream_handler = logging.StreamHandler(sys.stderr)
     stream_handler.setFormatter(formatter)
