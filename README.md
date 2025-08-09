@@ -1,32 +1,54 @@
 # skale-watchdog
-SKALE microservice for providing statuses of SKALE node docker containers
 
+[![Discord](https://img.shields.io/discord/534485763354787851.svg)](https://discord.gg/vvUtWJB)
 
-###REST JSON API
-Watchdog provides simple REST JSON API available on port 3009 (http://SKALE_NODE_IP:3009)
+SKALE Watchdog microservice: exposes health/status info for SKALE/FAIR node components.
 
+## REST API (current)
 
+Base URL: http://\<NODE\_IP>:3009
 
-####'/status/core'
+All endpoints return JSON in format: {"data": <payload>|null, "error": \<string|null>}.
 
-####'/status/sgx'
+### Common group
 
-####'/status/schains'
+```
+GET /api/v1/common/hardware
+GET /api/v1/common/meta-info
+GET /api/v1/common/btrfs
+GET /api/v1/common/sgx
+GET /api/v1/common/check-report
+GET /api/v1/common/endpoint
+GET /api/v1/common/containers (query: all=True)
+GET /api/v1/common/ssl
+```
 
-####'/status/hardware'
+### SKALE network specific (SKALE\_NETWORK\_TYPE=skale)
 
-####'/status/endpoint'
+```
+GET /api/v1/skale/schains
+GET /api/v1/skale/ima
+GET /api/v1/skale/schain-containers-versions
+GET /api/v1/skale/public-ip
+GET /api/v1/skale/validator-nodes
+GET /api/v1/skale/sm-abi
+GET /api/v1/skale/ima-abi
+```
 
-####'/status/schain-containers-versions'
+### Fair network specific (SKALE\_NETWORK\_TYPE=fair)
 
-####'/status/meta-info'
+```
+GET /api/v1/fair/chain-checks
+```
 
-####'/status/btrfs'
+Notes:
 
-####'/status/ssl' 
+* Add header/body option {"\_no\_cache": true} (JSON) to force a cold fetch.
+* Response time is logged; caching reduces latency.
+* Non-200 upstream responses are wrapped with error message in "error" field.
 
-####'/status/ima'
+### License
 
-####'/status/public-ip'
+![GitHub](https://img.shields.io/github/license/skalenetwork/skale-watchdog.svg)
 
-####'/status/validator-nodes'
+All contributions are made under the [GNU Affero General Public License v3](https://www.gnu.org/licenses/agpl-3.0.en.html). See [LICENSE](LICENSE).
