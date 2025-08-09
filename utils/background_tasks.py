@@ -27,8 +27,9 @@ import uwsgi
 from configs import (
     DEFAULT_TASK_INTERVAL,
     DISABLE_BACKGROUND,
-    HEALTHCHECKS_ROUTES,
-    SIGNAL_OFFSET
+    HEALTHCHECK_ROUTES,
+    SIGNAL_OFFSET,
+    SKALE_NETWORK_TYPE,
 )
 from utils.healthchecks import update_check_cache
 from utils.log import init_default_logger
@@ -39,27 +40,34 @@ init_default_logger()
 logger = logging.getLogger(__name__)
 
 
-def task(num, route):
-    logger.info('[TASK %d] Started', num)
+def task(num, group, check):
+    logger.info('[TASK %d] Started %s:%s', num, group, check)
     start = timer()
-    update_check_cache(route, task=num)
+    update_check_cache(group, check, task=num)
     elapsed = int(timer() - start)
-    logger.info('[TASK %d] Finished, elapsed time %ds', num, elapsed)
+    logger.info('[TASK %d] Finished %s:%s elapsed %ds', num, group, check, elapsed)
 
 
-def make_background_task(route):
-    return partial(task, route=route)
+def make_background_task(group, check):
+    return partial(task, group=group, check=check)
 
 
 def init_tasks():
-    logger.info('Initializing backgound tasks')
-    for i, check in enumerate(HEALTHCHECKS_ROUTES):
+    logger.info('Initializing background tasks')
+    combined = []
+    # Always include common group
+    for check in HEALTHCHECK_ROUTES['common'].keys():
+        combined.append(('common', check))
+    # Include network-specific group
+    net_group = SKALE_NETWORK_TYPE if SKALE_NETWORK_TYPE in HEALTHCHECK_ROUTES else 'fair'
+    for check in HEALTHCHECK_ROUTES[net_group].keys():
+        combined.append((net_group, check))
+
+    for i, (group, check) in enumerate(combined):
         num = SIGNAL_OFFSET + i
-        logger.info('Adding task %d %s', num, check)
-        uwsgi.register_signal(num, 'spooler', make_background_task(check))
-        interval = DEFAULT_TASK_INTERVAL
-        if check == 'schains':
-            interval *= 2
+        logger.info('Adding task %d %s:%s', num, group, check)
+        uwsgi.register_signal(num, 'spooler', make_background_task(group, check))
+        interval = DEFAULT_TASK_INTERVAL * (2 if check == 'schains' else 1)
         uwsgi.add_timer(num, interval)
     logger.info('Background tasks initialized')
 

@@ -19,9 +19,12 @@
 
 import json
 from dataclasses import dataclass
+from typing import Literal
 
 from flask import Response
 from http import HTTPStatus
+
+RouteType = Literal['common', 'skale', 'fair']
 
 
 @dataclass
@@ -30,10 +33,12 @@ class SkaleApiResponse:
     data: dict
 
     def to_json(self):
-        return json.dumps({
-            'code': self.code,
-            'data': self.data,
-        })
+        return json.dumps(
+            {
+                'code': self.code,
+                'data': self.data,
+            }
+        )
 
     def to_bytes(self):
         return self.to_json().encode('utf-8')
@@ -57,20 +62,13 @@ class SkaleApiResponse:
 
     def to_flask_response(self):
         return Response(
-            response=json.dumps(self.data),
-            status=self.code,
-            mimetype='application/json'
+            response=json.dumps(self.data), status=self.code, mimetype='application/json'
         )
 
 
 def construct_err_response(status, err):
-    return SkaleApiResponse(
-        code=status, data={'data': None, 'error': str(err)}
-    )
+    return SkaleApiResponse(code=status, data={'data': None, 'error': str(err)})
 
 
 def construct_ok_response(data=None):
-    return SkaleApiResponse(
-        code=HTTPStatus.OK,
-        data={'data': data, 'error': None}
-    )
+    return SkaleApiResponse(code=HTTPStatus.OK, data={'data': data, 'error': None})
