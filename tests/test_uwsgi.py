@@ -54,9 +54,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
             return None
 
     def do_GET(self):
-        # Simulate network latency for all requests
         time.sleep(RequestsHandler.REQUEST_SLEEP)
-        # Updated underlying SKALE API endpoints (new format)
         if self.path == '/api/v1/info/sgx':
             time.sleep(20)
             self._set_headers(code=200)
@@ -81,7 +79,6 @@ class RequestsHandler(BaseHTTPRequestHandler):
                 self._set_headers(code=400)
                 response = {'status': 'error', 'payload': {'endpoint': 'error'}}
         elif self.path == '/api/v1/info/meta-info':
-            # Always respond with error to emulate failing upstream route
             self._set_headers(code=400)
             response = {'status': 'error', 'payload': {'meta-info': 'error'}}
         else:
@@ -198,30 +195,30 @@ def test_changing_request(skale_api):
     time.sleep(140)
 
     with in_time(seconds=2):
-        response = requests.get(schains_url, json={'_no_cache': True}, timeout=60)
+        response = requests.get(schains_url, timeout=60)
         data = response.json()
-    assert data == {'data': {'schains': False}, 'error': None}
+        assert data == {'data': {'schains': False}, 'error': None}
 
     with in_time(seconds=2):
-        response = requests.get(endpoint_url, json={'_no_cache': True}, timeout=60)
+        response = requests.get(endpoint_url, timeout=60)
         data = response.json()
-    assert data == {
-        'data': None,
-        'error': 'Request to /api/v1/info/endpoint-info failed, code: 400',
-    }  # noqa
+        assert data == {
+            'data': None,
+            'error': 'Request to api/v1/node/endpoint-info failed, code: 400',
+        }  # noqa
 
     mq_schains.put('schains')
     mq_endpoint.put('endpoint')
     time.sleep(300)
     with in_time(seconds=2):
-        response = requests.get(schains_url, json={'_no_cache': True}, timeout=60)
+        response = requests.get(schains_url, timeout=60)
         data = response.json()
-    assert data == {'data': {'schains': True}, 'error': None}
+        assert data == {'data': {'schains': True}, 'error': None}
 
     with in_time(seconds=2):
-        response = requests.get(endpoint_url, json={'_no_cache': True}, timeout=60)
+        response = requests.get(endpoint_url, timeout=60)
         data = response.json()
-    assert data == {'data': {'endpoint': True}, 'error': None}
+        assert data == {'data': {'endpoint': True}, 'error': None}
 
 
 def test_concurrent_request_one_endpoint(skale_api):
