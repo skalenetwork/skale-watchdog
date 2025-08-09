@@ -13,4 +13,4 @@ else
 fi
 
 echo "==================================================================="
-echo "Uploaded to pypi, check at https://pypi.org/project/skale.py/$VERSION/"
+echo "Uploaded to pypi, check at https://pypi.org/project/skale-watchdog-client/$VERSION/"
