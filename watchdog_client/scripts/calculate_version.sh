@@ -21,6 +21,8 @@ if [[ $BRANCH == 'stable' ]]; then
     exit 0
 elif [[ $BRANCH == 'develop' ]]; then
     POSTFIX="dev"
+elif [[ $BRANCH == 'test' ]]; then
+    POSTFIX="dev"
 elif [[ $BRANCH == 'beta' ]]; then
     POSTFIX="b"
 else
