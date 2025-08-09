@@ -55,10 +55,8 @@ def make_background_task(group, check):
 def init_tasks():
     logger.info('Initializing background tasks')
     combined = []
-    # Always include common group
     for check in HEALTHCHECK_ROUTES['common'].keys():
         combined.append(('common', check))
-    # Include network-specific group
     net_group = SKALE_NETWORK_TYPE if SKALE_NETWORK_TYPE in HEALTHCHECK_ROUTES else 'fair'
     for check in HEALTHCHECK_ROUTES[net_group].keys():
         combined.append((net_group, check))
