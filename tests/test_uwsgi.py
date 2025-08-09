@@ -198,12 +198,12 @@ def test_changing_request(skale_api):
     time.sleep(140)
 
     with in_time(seconds=2):
-        response = requests.get(schains_url, timeout=60)
+        response = requests.get(schains_url, json={'_no_cache': True}, timeout=60)
         data = response.json()
     assert data == {'data': {'schains': False}, 'error': None}
 
     with in_time(seconds=2):
-        response = requests.get(endpoint_url, timeout=60)
+        response = requests.get(endpoint_url, json={'_no_cache': True}, timeout=60)
         data = response.json()
     assert data == {
         'data': None,
@@ -214,12 +214,12 @@ def test_changing_request(skale_api):
     mq_endpoint.put('endpoint')
     time.sleep(300)
     with in_time(seconds=2):
-        response = requests.get(schains_url, timeout=60)
+        response = requests.get(schains_url, json={'_no_cache': True}, timeout=60)
         data = response.json()
     assert data == {'data': {'schains': True}, 'error': None}
 
     with in_time(seconds=2):
-        response = requests.get(endpoint_url, timeout=60)
+        response = requests.get(endpoint_url, json={'_no_cache': True}, timeout=60)
         data = response.json()
     assert data == {'data': {'endpoint': True}, 'error': None}
 
