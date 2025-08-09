@@ -13,13 +13,16 @@ setup(
     author='SKALE Labs',
     author_email='support@skalelabs.com',
     url='https://github.com/skalenetwork/skale-watchdog',
+    license='AGPL-3.0-or-later',
+    license_files=['LICENSE'],
     include_package_data=True,
     install_requires=[
         'requests>=2.31.0',
     ],
     extras_require={
         'dev': [
-            'twine==4.0.2',
+            'twine>=5.0.0,<7',
+            'build>=1.2.1',
         ],
     },
     python_requires='>=3.11,<4',
