@@ -8,7 +8,7 @@ from setuptools import (
 
 setup(
     name='skale-watchdog-client',
-    version='1.0',
+    version='1.1',
     description='SKALE Watchdog Client - SKALE and FAIR Nodes Health Checks',
     author='SKALE Labs',
     author_email='support@skalelabs.com',
