@@ -204,7 +204,7 @@ def test_changing_request(skale_api):
         data = response.json()
         assert data == {
             'data': None,
-            'error': 'Request to /api/v1/node/endpoint-info failed, code: 400',
+            'error': 'Request to /api/v1/info/endpoint-info failed, code: 400',
         }  # noqa
 
     mq_schains.put('schains')
