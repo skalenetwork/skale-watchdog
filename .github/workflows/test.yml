@@ -25,9 +25,8 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install codecov pytest-cov
-    - name: Lint with flake8
-      run: |
-        flake8 .
+    - name: Lint with ruff
+      run: ruff check
     - name: Run unit tests
       run: |
         scripts/run_unit_tests.sh

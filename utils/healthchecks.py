@@ -22,14 +22,13 @@ import requests
 from http import HTTPStatus
 from typing import Optional
 
-from configs import (
-    API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECKS_ROUTES
-)
+from configs import API_HOST, API_PORT, API_TIMEOUT, HEALTHCHECK_ROUTES
 from utils.cache import Cache, get_cache
 from utils.structures import (
+    RouteType,
     construct_err_response,
     construct_ok_response,
-    SkaleApiResponse
+    SkaleApiResponse,
 )
 
 
@@ -37,31 +36,29 @@ logger = logging.getLogger(__name__)
 
 
 def get_healthcheck_result(
-    check,
+    route_type: RouteType,
+    check: str,
     rcache=None,
     no_cache=False,
-    params=None
+    params=None,
 ):
-    route = HEALTHCHECKS_ROUTES[check]
-    return get_result_by_route(
-        route,
-        rcache=rcache,
-        no_cache=no_cache,
-        params=params
-    )
+    route = HEALTHCHECK_ROUTES[route_type][check]
+    return get_result_by_route(route, rcache=rcache, no_cache=no_cache, params=params)
 
 
-def get_result_by_route(route, rcache=None, no_cache=False, params=None):
+def get_result_by_route(
+    route,
+    rcache=None,
+    no_cache=False,
+    params=None,
+):
     if not no_cache:
         rcache = rcache or get_cache()
-        cached_response = SkaleApiResponse.from_bytes(
-            rcache.get_item(route)
-        )
+        cached_response = SkaleApiResponse.from_bytes(rcache.get_item(route))
     else:
         logger.info(f'API request for {route}: no cache mode is enabled')
         cached_response = None
-    response = cached_response or request_healthcheck_from_skale_api(
-        route, params=params)
+    response = cached_response or request_healthcheck_from_skale_api(route, params=params)
     if cached_response:
         logger.info(f'API request for {route}: cached response founded')
         logger.debug(f'API request for {route}. Cached response: {response}')
@@ -102,7 +99,7 @@ def request_healthcheck_from_skale_api(route, task=None, params=None):
         logger.info(f'[TASK {task}] {err_msg}')
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
-    if route == HEALTHCHECKS_ROUTES['sgx']:
+    if route == HEALTHCHECK_ROUTES['common']['sgx']:
         data.pop('sgx_keyname', None)
         data.pop('sgx_server_url', None)
 
@@ -114,20 +111,27 @@ def get_healthcheck_url(route):
 
 
 def healthcheck_urls_from_routes():
-    return map(
-        lambda r: (r, get_healthcheck_url(r)), HEALTHCHECKS_ROUTES.values()
-    )
+    for group_routes in HEALTHCHECK_ROUTES.values():
+        for route in group_routes.values():
+            yield route, get_healthcheck_url(route)
 
 
 def update_check_cache(
+    group: str,
     check: str,
     task: Optional[str] = None,
-    rcache: Cache = None
+    rcache: Optional[Cache] = None,
 ):
     rcache = rcache or get_cache()
-    route = HEALTHCHECKS_ROUTES[check]
+    try:
+        route = HEALTHCHECK_ROUTES[group][check]
+    except KeyError:
+        logger.error(f'[TASK {task}] Unknown healthcheck {group}:{check}')
+        return construct_err_response(
+            HTTPStatus.BAD_REQUEST, f'Unknown healthcheck {group}:{check}'
+        )
     response = request_healthcheck_from_skale_api(route, task=task)
-    r = rcache.update_item(route, response.to_bytes())
-    if not r:
-        logger.error(f'[TASK {task}] Updating cache item for {check} failed')
+    stored = rcache.update_item(route, response.to_bytes())
+    if not stored:
+        logger.error(f'[TASK {task}] Updating cache item for {group}:{check} failed')
     return response

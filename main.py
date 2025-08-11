@@ -22,14 +22,15 @@ import time
 from functools import wraps
 
 import flask
-from flask import Flask, g, request
+from flask import Flask, Blueprint, g, request
 from werkzeug.exceptions import InternalServerError
 
+from configs import SKALE_NETWORK_TYPE, HEALTHCHECK_ROUTES, get_api_url
 import utils.background_tasks  # noqa
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.healthchecks import get_healthcheck_result
 from utils.log import init_default_logger
-from utils.structures import construct_err_response
+from utils.structures import construct_err_response, RouteType
 
 init_default_logger()
 
@@ -49,6 +50,7 @@ def healthcheck(func):
         logger.debug('%s, options: %s', request, g.options)
         g.cold = g.options.get('_no_cache', False) if g.options else False
         return func(*args, **kwargs)
+
     return wrapper
 
 
@@ -66,107 +68,44 @@ def teardown_request(response):
 
 @app.errorhandler(InternalServerError)
 def handle_500(e):
-    original = getattr(e, "original_exception", None)
+    original = getattr(e, 'original_exception', None)
     logger.exception('Request failed with error %s', original)
     return construct_err_response(status=500, err=original).to_flask_response()
 
 
-@app.route('/status/core', methods=['GET'])
-@healthcheck
-def containers_core_status():
-    params = {'all': 'True'}
-    return get_healthcheck_result(
-        'containers',
-        no_cache=g.cold,
-        params=params
-    )
+ROUTE_QUERY_PARAMS = {
+    'common': {
+        'containers': {'all': 'True'},
+    }
+}
 
 
-@app.route('/status/sgx', methods=['GET'])
-@healthcheck
-def sgx_status():
-    return get_healthcheck_result('sgx', no_cache=g.cold)
+def build_blueprint(group: RouteType) -> Blueprint:
+    bp = Blueprint(group, __name__)
+    services = HEALTHCHECK_ROUTES.get(group, {})
+    for service_key in services.keys():
+        rule = service_key
+        params = ROUTE_QUERY_PARAMS.get(group, {}).get(service_key)
+
+        def make_view(_service=service_key, _group=group, _params=params):
+            @healthcheck
+            def view():
+                return get_healthcheck_result(_group, _service, no_cache=g.cold, params=_params)  # type: ignore[arg-type]
+
+            view.__name__ = f'{_group}_{_service}'
+            return view
+
+        bp.route(get_api_url(group, rule), methods=['GET'])(make_view())
+    return bp
 
 
-@app.route('/status/schains', methods=['GET'])
-@healthcheck
-def schains_status():
-    return get_healthcheck_result('schains', no_cache=g.cold)
-
-
-@app.route('/status/hardware', methods=['GET'])
-@healthcheck
-def hardware_status():
-    return get_healthcheck_result('hardware', no_cache=g.cold)
-
-
-@app.route('/status/endpoint', methods=['GET'])
-@healthcheck
-def endpoint_status():
-    return get_healthcheck_result('endpoint', no_cache=g.cold)
-
-
-@app.route('/status/schain-containers-versions', methods=['GET'])
-@healthcheck
-def schain_containers_versions_status():
-    return get_healthcheck_result('schain_versions', no_cache=g.cold)
-
-
-@app.route('/status/meta-info', methods=['GET'])
-@healthcheck
-def meta_status():
-    return get_healthcheck_result('meta', no_cache=g.cold)
-
-
-@app.route('/status/btrfs', methods=['GET'])
-@healthcheck
-def btrfs_status():
-    return get_healthcheck_result('btrfs', no_cache=g.cold)
-
-
-@app.route('/status/ssl', methods=['GET'])
-@healthcheck
-def ssl_status():
-    return get_healthcheck_result('ssl', no_cache=g.cold)
-
-
-@app.route('/status/ima', methods=['GET'])
-@healthcheck
-def ima_status():
-    return get_healthcheck_result('ima', no_cache=g.cold)
-
-
-@app.route('/status/public-ip', methods=['GET'])
-@healthcheck
-def public_ip():
-    return get_healthcheck_result('public-ip', no_cache=g.cold)
-
-
-@app.route('/status/validator-nodes', methods=['GET'])
-@healthcheck
-def validator_nodes():
-    return get_healthcheck_result('validator-nodes', no_cache=g.cold)
-
-
-@app.route('/status/check-report', methods=['GET'])
-@healthcheck
-def check_report():
-    return get_healthcheck_result('check-report', no_cache=g.cold)
-
-
-@app.route('/status/sm-abi', methods=['GET'])
-@healthcheck
-def sm_abi_hash():
-    return get_healthcheck_result('sm-abi', no_cache=g.cold)
-
-
-@app.route('/status/ima-abi', methods=['GET'])
-@healthcheck
-def ima_abi_hash():
-    return get_healthcheck_result('ima-abi', no_cache=g.cold)
+app.register_blueprint(build_blueprint('common'))
+if SKALE_NETWORK_TYPE == 'skale':
+    app.register_blueprint(build_blueprint('skale'))
+else:
+    app.register_blueprint(build_blueprint('fair'))
 
 
 if __name__ == '__main__':
     logger.info('Starting SKALE docker containers Watchdog')
-    app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT,
-            host=FLASK_APP_HOST, use_reloader=False)
+    app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT, host=FLASK_APP_HOST, use_reloader=False)
