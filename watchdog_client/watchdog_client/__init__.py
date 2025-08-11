@@ -1,4 +1,3 @@
-# re-organized package submodule
 from __future__ import annotations
 
 import requests
@@ -64,6 +63,19 @@ class NodeBase:
 
     def check_report(self, **params: Any) -> ApiResult:
         return self._get(self._path(self.common_bp, 'check-report'), params)
+
+    def all_checks(self) -> Dict[str, ApiResult]:
+        excluded_names = {'all_checks', 'session', 'base_url', 'timeout'}
+        results: Dict[str, ApiResult] = {}
+        for name in sorted(dir(self)):
+            if name.startswith('_') or name in excluded_names:
+                continue
+            attr = getattr(self, name)
+            if not callable(attr):
+                continue
+            value = attr()
+            results[name] = value  # type: ignore[assignment]
+        return results
 
     def _path(self, bp: str, method: str) -> str:
         return f'{self.api_prefix}/{bp}/{method}'

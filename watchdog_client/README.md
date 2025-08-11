@@ -27,6 +27,11 @@ if r:
 	print('Public IP:', r.data)
 else:
 	print('Error:', r.error)
+
+# Execute every available check on a node
+results = skale_node.all_checks()
+for name, res in results.items():
+	print(name, 'OK' if res else f'ERR: {res.error}')
 ```
 
 ## API
@@ -55,6 +60,10 @@ else:
 ### FAIR-specific (`FairNode`)
 
 * chain\_checks (maps to /chain-checks)
+
+### Batch execution
+
+Call `all_checks()` on any node instance to execute each public check method (no params) and get a dict mapping method name to its ApiResult. One failing check does not stop others.
 
 ## Result Object
 
