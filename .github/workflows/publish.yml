@@ -7,7 +7,6 @@ on:
       - develop
       - beta
       - stable
-      - test
 
 jobs:
   build:
