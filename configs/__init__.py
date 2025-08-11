@@ -2,36 +2,45 @@ import os
 
 
 LONG_LINE = '=' * 100
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 API_HOST = 'localhost'
 API_PORT = '3007'
 
-API_PREFIX = 'api'
+API_PREFIX = '/api'
 CURRENT_API_VERSION = 'v1'
 API_VERSION_PREFIX = os.path.join(API_PREFIX, CURRENT_API_VERSION)
 
-
-def get_api_url(group_name, method_name):
-    return os.path.join(API_VERSION_PREFIX, group_name, method_name)
+SKALE_NETWORK_TYPE = os.environ.get('SKALE_NETWORK_TYPE', 'skale')
 
 
-HEALTHCHECKS_ROUTES = {
-    'containers': get_api_url('health', 'containers?all=True'),
-    'sgx': get_api_url('health', 'sgx'),
-    'schains': get_api_url('health', 'schains'),
-    'ima': get_api_url('health', 'ima'),
-    'hardware': get_api_url('node', 'hardware'),
-    'endpoint': get_api_url('node', 'endpoint-info'),
-    'meta': get_api_url('node', 'meta-info'),
-    'schain_versions': get_api_url('schains', 'container-versions'),
-    'btrfs': get_api_url('node', 'btrfs-info'),
-    'ssl': get_api_url('ssl', 'status'),
-    'public-ip': get_api_url('node', 'public-ip'),
-    'validator-nodes': get_api_url('node', 'validator-nodes'),
-    'check-report': get_api_url('health', 'check-report'),
-    'sm-abi': get_api_url('node', 'sm-abi'),
-    'ima-abi': get_api_url('node', 'ima-abi')
+def get_api_url(blueprint_name, method_name):
+    return os.path.join(API_VERSION_PREFIX, blueprint_name, method_name)
+
+
+HEALTHCHECK_ROUTES = {
+    'common': {
+        'hardware': get_api_url('info', 'hardware'),
+        'meta-info': get_api_url('info', 'meta-info'),
+        'btrfs': get_api_url('info', 'btrfs-info'),
+        'sgx': get_api_url('info', 'sgx'),
+        'check-report': get_api_url('info', 'check-report'),
+        'endpoint': get_api_url('info', 'endpoint-info'),
+        'containers': get_api_url('info', 'containers?all=True'),
+        'ssl': get_api_url('ssl', 'status'),
+    },
+    'skale': {
+        'schains': get_api_url('health', 'schains'),
+        'ima': get_api_url('health', 'ima'),
+        'schain-containers-versions': get_api_url('schains', 'container-versions'),
+        'public-ip': get_api_url('node', 'public-ip'),
+        'validator-nodes': get_api_url('node', 'validator-nodes'),
+        'sm-abi': get_api_url('node', 'sm-abi'),
+        'ima-abi': get_api_url('node', 'ima-abi'),
+    },
+    'fair': {
+        'chain-checks': get_api_url('fair-chain', 'checks'),
+    },
 }
 
 API_TIMEOUT = 1000  # in seconds
