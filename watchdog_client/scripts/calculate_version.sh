@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-VERSION=$(python setup.py --version)
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+VERSION=$(cat $DIR/../../VERSION)
+
 USAGE_MSG='Usage: BRANCH=[BRANCH] calculate_version.sh'
 
 if [ -z "$BRANCH" ]
@@ -17,14 +20,12 @@ fi
 
 
 if [[ $BRANCH == 'stable' ]]; then
-    echo $VERSION
+    echo "$VERSION"
     exit 0
 elif [[ $BRANCH == 'develop' ]]; then
-    POSTFIX="dev"
-elif [[ $BRANCH == 'test' ]]; then
-    POSTFIX="dev"
+    OUTPUT_TYPE="dev"
 elif [[ $BRANCH == 'beta' ]]; then
-    POSTFIX="b"
+    OUTPUT_TYPE="b"
 else
     echo "Branch is not valid, couldn't calculate version"
     exit 1
@@ -32,11 +33,20 @@ fi
 
 git fetch --tags > /dev/null
 
-for (( NUMBER=0; ; NUMBER++ ))
-do
-    FULL_VERSION="$VERSION$POSTFIX$NUMBER"
-    if ! [[ $(git tag -l | grep $FULL_VERSION) ]]; then
-        echo "$FULL_VERSION" | tr / -
+NUMBER=0
+
+while true; do
+    TAG_CANDIDATE="${VERSION}${BRANCH}${NUMBER}"
+    if ! git tag -l "${TAG_CANDIDATE}" | grep -q "${TAG_CANDIDATE}" ; then
+        # Construct PEP 440 compliant output
+        if [[ $BRANCH == 'develop' ]]; then
+            echo "${VERSION}.dev${NUMBER}" | tr / -
+        elif [[ $BRANCH == 'beta' ]]; then
+            echo "${VERSION}b${NUMBER}" | tr / -
+        else
+            echo "${VERSION}" | tr / -
+        fi
         break
     fi
+    NUMBER=$((NUMBER+1))
 done
