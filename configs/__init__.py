@@ -12,6 +12,7 @@ CURRENT_API_VERSION = 'v1'
 API_VERSION_PREFIX = os.path.join(API_PREFIX, CURRENT_API_VERSION)
 
 SKALE_NETWORK_TYPE = os.environ.get('SKALE_NETWORK_TYPE', 'skale')
+PASSIVE_NODE = os.getenv('PASSIVE_NODE') == 'True'
 
 
 def get_api_url(blueprint_name, method_name):
@@ -23,7 +24,6 @@ HEALTHCHECK_ROUTES = {
         'hardware': get_api_url('info', 'hardware'),
         'meta-info': get_api_url('info', 'meta-info'),
         'btrfs': get_api_url('info', 'btrfs-info'),
-        'sgx': get_api_url('info', 'sgx'),
         'check-report': get_api_url('info', 'check-report'),
         'endpoint': get_api_url('info', 'endpoint-info'),
         'containers': get_api_url('info', 'containers?all=True'),
@@ -40,8 +40,12 @@ HEALTHCHECK_ROUTES = {
     },
     'fair': {
         'chain-checks': get_api_url('fair-chain', 'checks'),
+        'chain-record': get_api_url('fair-chain', 'record'),
     },
 }
+
+if not PASSIVE_NODE:
+    HEALTHCHECK_ROUTES['common']['sgx'] = get_api_url('info', 'sgx')
 
 API_TIMEOUT = 1000  # in seconds
 DEFAULT_TASK_INTERVAL = 60

@@ -15,11 +15,13 @@ Supports Python 3.11+.
 ## Quick Start
 
 ```python
-from watchdog_client import SkaleNode, FairNode
+from watchdog_client import SkaleNode, FairNode, FairPassiveNode
 
 # Base URL can be domain name or IP address of the node.
 skale_node = SkaleNode('my-skale-node.example.com')
 fair_node = FairNode('23.56.24.61')
+# Use FairPassiveNode for FAIR nodes running in passive mode (no SGX endpoint)
+fair_passive = FairPassiveNode('23.56.24.62')
 
 # Call any endpoint – each returns ApiResult (fields: data, error, status_code)
 r = skale_node.public_ip()
@@ -39,7 +41,7 @@ for name, res in results.items():
 ### Common (available on both SkaleNode and FairNode)
 
 * containers
-* sgx
+* sgx (not available on FAIR passive nodes; see FairPassiveNode)
 * hardware
 * endpoint
 * meta\_info (maps to /meta-info)
@@ -60,6 +62,13 @@ for name, res in results.items():
 ### FAIR-specific (`FairNode`)
 
 * chain\_checks (maps to /chain-checks)
+* chain\_record (maps to /chain-record)
+
+### FAIR Passive (`FairPassiveNode`)
+
+Same as `FairNode`, except:
+
+* sgx — returns an error ApiResult: "SGX check is not available on FAIR passive nodes"
 
 ### Batch execution
 
