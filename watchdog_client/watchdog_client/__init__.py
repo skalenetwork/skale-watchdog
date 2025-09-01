@@ -66,6 +66,8 @@ class NodeBase:
 
     def all_checks(self) -> Dict[str, ApiResult]:
         excluded_names = {'all_checks', 'session', 'base_url', 'timeout'}
+        if self.__class__.__name__ == 'FairPassiveNode':
+            excluded_names.add('sgx')
         results: Dict[str, ApiResult] = {}
         for name in sorted(dir(self)):
             if name.startswith('_') or name in excluded_names:
@@ -130,5 +132,17 @@ class FairNode(NodeBase):
     def chain_checks(self, **params: Any) -> ApiResult:
         return self._get(self._path(self.bp, 'chain-checks'), params)
 
+    def chain_record(self, **params: Any) -> ApiResult:
+        return self._get(self._path(self.bp, 'chain-record'), params)
 
-__all__ = ['ApiResult', 'NodeBase', 'SkaleNode', 'FairNode']
+
+class FairPassiveNode(FairNode):
+    def sgx(self, **params: Any) -> ApiResult:  # type: ignore[override]
+        return ApiResult(
+            data=None,
+            error='SGX check is not available on FAIR passive nodes',
+            status_code=404,
+        )
+
+
+__all__ = ['ApiResult', 'NodeBase', 'SkaleNode', 'FairNode', 'FairPassiveNode']
