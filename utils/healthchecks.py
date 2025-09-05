@@ -99,7 +99,7 @@ def request_healthcheck_from_skale_api(route, task=None, params=None):
         logger.info(f'[TASK {task}] {err_msg}')
         return construct_err_response(HTTPStatus.BAD_REQUEST, err_msg)
 
-    if route == HEALTHCHECK_ROUTES['common']['sgx']:
+    if route == HEALTHCHECK_ROUTES['common'].get('sgx', None):
         data.pop('sgx_keyname', None)
         data.pop('sgx_server_url', None)
 
