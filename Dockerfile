@@ -2,6 +2,13 @@ FROM python:3.13.8-slim-trixie AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    build-essential \
+    libpcre2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir app
 WORKDIR /app
 
