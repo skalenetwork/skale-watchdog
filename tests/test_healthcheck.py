@@ -19,13 +19,14 @@
 
 import json
 import pickle
-import requests
 from http import HTTPStatus
 from unittest import mock
-from configs import HEALTHCHECK_ROUTES
 
-from utils.healthchecks import get_healthcheck_result, get_healthcheck_url, get_result_by_route
+import requests
+
+from configs import HEALTHCHECK_ROUTES
 from utils.cache import get_cache
+from utils.healthchecks import get_healthcheck_result, get_healthcheck_url, get_result_by_route
 from utils.structures import construct_ok_response
 
 data_ok1 = {
