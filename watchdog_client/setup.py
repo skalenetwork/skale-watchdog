@@ -5,7 +5,6 @@ from setuptools import (
     setup,
 )
 
-
 setup(
     name='skale-watchdog-client',
     version='1.1',
@@ -25,13 +24,13 @@ setup(
             'build>=1.2.1',
         ],
     },
-    python_requires='>=3.11,<4',
+    python_requires='>=3.13,<4',
     keywords='skale',
     packages=find_packages(exclude=['tests']),
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.13',
     ],
 )

@@ -23,6 +23,7 @@ import sys
 from urllib.parse import urlparse
 
 from flask import has_request_context, request
+
 from configs import ENDPOINT, SGX_SERVER_URL
 
 LOG_FORMAT = '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa

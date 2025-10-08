@@ -1,18 +1,17 @@
 import json
-import queue
 import logging
-import requests
+import queue
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
-from concurrent.futures import as_completed, ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from multiprocessing import Process, Queue
 from timeit import default_timer as timer
 
 import pytest
+import requests
 
 from configs import DEFAULT_TASK_INTERVAL
-
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +28,8 @@ def compose_watchdog_url(host=BASE_HOST, port=WATCHDOG_PORT, route=''):
     return f'http://{host}:{port}{route}'
 
 
-mq_schains = Queue()
-mq_endpoint = Queue()
+mq_schains: Queue = Queue()
+mq_endpoint: Queue = Queue()
 
 
 class RequestsHandler(BaseHTTPRequestHandler):
