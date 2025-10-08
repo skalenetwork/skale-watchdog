@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-VERSION=$(cat $DIR/../../VERSION)
+VERSION=$(grep '^version = ' $DIR/../../pyproject.toml | cut -d'"' -f2)
 
 USAGE_MSG='Usage: BRANCH=[BRANCH] calculate_version.sh'
 
