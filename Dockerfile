@@ -20,7 +20,11 @@ FROM python:3.13.8-slim-trixie
 
 COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
+
+WORKDIR /app
 COPY . .
+
+RUN mkdir -p /app/healthspool
 
 ENV PYTHONPATH="/app"
 CMD ["uwsgi", "--ini", "uwsgi.ini"]
