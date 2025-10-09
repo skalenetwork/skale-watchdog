@@ -30,9 +30,9 @@ jobs:
       - name: Install python dependencies - watchdog_client
         working-directory: ./watchdog_client
         run: |
-          uv pip install build hatchling
-          uv pip install -e .
-          uv pip install -e .[dev]
+          uv pip install --system build hatchling
+          uv pip install --system -e .
+          uv pip install --system -e .[dev]
       - name: Build library
         working-directory: ./watchdog_client
         run: |
