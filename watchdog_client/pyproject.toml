@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "skale-watchdog-client"
+version = "0.0.0"
+description = "SKALE Watchdog Client - SKALE and FAIR Nodes Health Checks"
+authors = [{ name = "SKALE Labs", email = "support@skalelabs.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13,<4"
+dependencies = ["requests>=2.31.0"]
+keywords = ["skale"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.optional-dependencies]
+dev = ["twine>=5.0.0,<7", "build>=1.2.1"]
+
+[project.urls]
+Homepage = "https://github.com/skalenetwork/skale-watchdog"
+
+[tool.hatch.build.targets.wheel]
+packages = ["watchdog_client"]

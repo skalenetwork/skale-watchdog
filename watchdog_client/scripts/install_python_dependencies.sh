@@ -2,7 +2,7 @@
 
 set -ea
 
-python -m pip install --upgrade pip
-pip install -e .
-pip install -e .[dev]
-pip install codecov pytest-cov
+uv pip install build hatchling
+uv pip install -e .
+uv pip install -e .[dev]
+uv pip install codecov pytest-cov
