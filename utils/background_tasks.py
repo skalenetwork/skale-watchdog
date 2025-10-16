@@ -34,7 +34,6 @@ from configs import (
 from utils.healthchecks import update_check_cache
 from utils.log import init_default_logger
 
-
 init_default_logger()
 
 logger = logging.getLogger(__name__)

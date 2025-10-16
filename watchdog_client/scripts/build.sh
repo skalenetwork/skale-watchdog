@@ -2,15 +2,23 @@
 
 set -e
 
-CURRENT_VERSION="$(python setup.py --version)"
+CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
 
-sed -i "s/version='${CURRENT_VERSION}/version='${VERSION}/g" setup.py
+if [ -z "$VERSION" ]; then
+    echo "VERSION environment variable is not set"
+    exit 1
+fi
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s/version = \"${CURRENT_VERSION}\"/version = \"${VERSION}\"/g" pyproject.toml
+else
+    sed -i "s/version = \"${CURRENT_VERSION}\"/version = \"${VERSION}\"/g" pyproject.toml
+fi
 
 rm -rf ./dist/*
 
-python setup.py sdist
-python setup.py bdist_wheel
+python -m build
 
 echo "==================================================================="
-echo "Done build: skale.py $VERSION/"
+echo "Done build: skale-watchdog-client $VERSION/"
 

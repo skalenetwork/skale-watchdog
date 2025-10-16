@@ -22,23 +22,20 @@ import time
 from functools import wraps
 
 import flask
-from flask import Flask, Blueprint, g, request
+from flask import Blueprint, Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
-from configs import SKALE_NETWORK_TYPE, HEALTHCHECK_ROUTES, get_api_url
 import utils.background_tasks  # noqa
+from configs import HEALTHCHECK_ROUTES, SKALE_NETWORK_TYPE, get_api_url
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.healthchecks import get_healthcheck_result
 from utils.log import init_default_logger
-from utils.structures import construct_err_response, RouteType
+from utils.structures import RouteType, construct_err_response
 
 init_default_logger()
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
-app.port = FLASK_APP_PORT
-app.host = FLASK_APP_HOST
-app.use_reloader = False
 
 
 def healthcheck(func):
