@@ -19,10 +19,10 @@
 
 import json
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Literal
 
 from flask import Response
-from http import HTTPStatus
 
 RouteType = Literal['common', 'skale', 'fair']
 

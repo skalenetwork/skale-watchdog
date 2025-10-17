@@ -10,7 +10,7 @@ Minimal Python client for interacting with SKALE Watchdog node APIs (SKALE + FAI
 pip install skale-watchdog-client
 ```
 
-Supports Python 3.11+.
+Supports Python 3.13+.
 
 ## Quick Start
 
