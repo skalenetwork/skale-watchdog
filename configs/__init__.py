@@ -33,9 +33,6 @@ HEALTHCHECK_ROUTES = {
         'ima': get_api_url('health', 'ima'),
         'schain-containers-versions': get_api_url('schains', 'container-versions'),
         'public-ip': get_api_url('node', 'public-ip'),
-        'validator-nodes': get_api_url('node', 'validator-nodes'),
-        'sm-abi': get_api_url('node', 'sm-abi'),
-        'ima-abi': get_api_url('node', 'ima-abi'),
     },
     'fair': {
         'chain-checks': get_api_url('fair-chain', 'checks'),

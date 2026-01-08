@@ -120,12 +120,6 @@ class SkaleNode(NodeBase):
     def validator_nodes(self, **params: Any) -> ApiResult:
         return self._get(self._path(self.bp, 'validator-nodes'), params)
 
-    def sm_abi_hash(self, **params: Any) -> ApiResult:
-        return self._get(self._path(self.bp, 'sm-abi'), params)
-
-    def ima_abi_hash(self, **params: Any) -> ApiResult:
-        return self._get(self._path(self.bp, 'ima-abi'), params)
-
 
 class FairNode(NodeBase):
     bp = 'fair'
