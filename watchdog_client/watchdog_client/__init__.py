@@ -69,6 +69,8 @@ class NodeBase:
         excluded_names = {'all_checks', 'session', 'base_url', 'timeout'}
         if self.__class__.__name__ == 'FairPassiveNode':
             excluded_names.add('sgx')
+        if self.__class__.__name__ == 'SkalePassiveNode':
+            excluded_names.update({'sgx', 'schains', 'ima', 'validator_nodes'})
         results: Dict[str, ApiResult] = {}
         for name in sorted(dir(self)):
             if name.startswith('_') or name in excluded_names:
@@ -121,6 +123,36 @@ class SkaleNode(NodeBase):
         return self._get(self._path(self.bp, 'validator-nodes'), params)
 
 
+class SkalePassiveNode(SkaleNode):
+    def sgx(self, **params: Any) -> ApiResult:
+        return ApiResult(
+            data=None,
+            error='SGX check is not available on SKALE passive nodes',
+            status_code=404,
+        )
+
+    def schains(self, **params: Any) -> ApiResult:
+        return ApiResult(
+            data=None,
+            error='schains check is not available on SKALE passive nodes',
+            status_code=404,
+        )
+
+    def ima(self, **params: Any) -> ApiResult:
+        return ApiResult(
+            data=None,
+            error='IMA check is not available on SKALE passive nodes',
+            status_code=404,
+        )
+
+    def validator_nodes(self, **params: Any) -> ApiResult:
+        return ApiResult(
+            data=None,
+            error='Validator nodes check is not available on SKALE passive nodes',
+            status_code=404,
+        )
+
+
 class FairNode(NodeBase):
     bp = 'fair'
 
@@ -140,4 +172,4 @@ class FairPassiveNode(FairNode):
         )
 
 
-__all__ = ['ApiResult', 'NodeBase', 'SkaleNode', 'FairNode', 'FairPassiveNode']
+__all__ = ['ApiResult', 'NodeBase', 'SkaleNode', 'SkalePassiveNode', 'FairNode', 'FairPassiveNode']
