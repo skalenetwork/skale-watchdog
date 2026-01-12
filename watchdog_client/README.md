@@ -15,13 +15,16 @@ Supports Python 3.13+.
 ## Quick Start
 
 ```python
-from watchdog_client import SkaleNode, FairNode, FairPassiveNode
+from watchdog_client import SkaleNode, SkalePassiveNode, FairNode, FairPassiveNode
 
 # Base URL can be domain name or IP address of the node.
 skale_node = SkaleNode('my-skale-node.example.com')
-fair_node = FairNode('23.56.24.61')
+# Use SkalePassiveNode for SKALE nodes running in passive mode
+skale_passive = SkalePassiveNode('my-passive-skale-node.example.com')
+
+fair_node = FairNode('my-fair-node.example.com')
 # Use FairPassiveNode for FAIR nodes running in passive mode (no SGX endpoint)
-fair_passive = FairPassiveNode('23.56.24.62')
+fair_passive = FairPassiveNode('my-passive-fair-node.example.com')
 
 # Call any endpoint – each returns ApiResult (fields: data, error, status_code)
 r = skale_node.public_ip()
@@ -56,8 +59,15 @@ for name, res in results.items():
 * schain\_containers\_versions (maps to /schain-containers-versions)
 * public\_ip (maps to /public-ip)
 * validator\_nodes (maps to /validator-nodes)
-* sm\_abi\_hash (maps to /sm-abi)
-* ima\_abi\_hash (maps to /ima-abi)
+
+### SKALE Passive (`SkalePassiveNode`)
+
+Same as `SkaleNode`, except the following checks return an error (404), because they are not available on SKALE passive nodes:
+
+* sgx
+* schains
+* ima
+* validator\_nodes
 
 ### FAIR-specific (`FairNode`)
 
