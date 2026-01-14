@@ -23,7 +23,7 @@ if [[ $BRANCH == 'stable' ]]; then
     echo "$VERSION"
     exit 0
 elif [[ $BRANCH == 'develop' ]]; then
-    OUTPUT_TYPE="dev"
+    OUTPUT_TYPE=".dev"
 elif [[ $BRANCH == 'beta' ]]; then
     OUTPUT_TYPE="b"
 else
@@ -36,17 +36,13 @@ git fetch --tags > /dev/null
 NUMBER=0
 
 while true; do
-    TAG_CANDIDATE="${VERSION}${BRANCH}${NUMBER}"
-    if ! git tag -l "${TAG_CANDIDATE}" | grep -q "${TAG_CANDIDATE}" ; then
-        # Construct PEP 440 compliant output
-        if [[ $BRANCH == 'develop' ]]; then
-            echo "${VERSION}.dev${NUMBER}" | tr / -
-        elif [[ $BRANCH == 'beta' ]]; then
-            echo "${VERSION}b${NUMBER}" | tr / -
-        else
-            echo "${VERSION}" | tr / -
-        fi
+    CANDIDATE="${VERSION}${OUTPUT_TYPE}${NUMBER}"
+    GITHUB_TAG="${VERSION}-${BRANCH}.${NUMBER}"
+
+    if git tag -l "${GITHUB_TAG}" | grep -q "^${GITHUB_TAG}$"; then
+        NUMBER=$((NUMBER+1))
+    else
+        echo "${CANDIDATE}" | tr / -
         break
     fi
-    NUMBER=$((NUMBER+1))
 done
