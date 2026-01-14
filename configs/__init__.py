@@ -29,13 +29,8 @@ HEALTHCHECK_ROUTES = {
         'ssl': get_api_url('ssl', 'status'),
     },
     'skale': {
-        'schains': get_api_url('health', 'schains'),
-        'ima': get_api_url('health', 'ima'),
         'schain-containers-versions': get_api_url('schains', 'container-versions'),
         'public-ip': get_api_url('node', 'public-ip'),
-        'validator-nodes': get_api_url('node', 'validator-nodes'),
-        'sm-abi': get_api_url('node', 'sm-abi'),
-        'ima-abi': get_api_url('node', 'ima-abi'),
     },
     'fair': {
         'chain-checks': get_api_url('fair-chain', 'checks'),
@@ -45,6 +40,11 @@ HEALTHCHECK_ROUTES = {
 
 if not PASSIVE_NODE:
     HEALTHCHECK_ROUTES['common']['sgx'] = get_api_url('info', 'sgx')
+    HEALTHCHECK_ROUTES['skale']['schains'] = get_api_url('health', 'schains')
+    HEALTHCHECK_ROUTES['skale']['ima'] = get_api_url('health', 'ima')
+    HEALTHCHECK_ROUTES['skale']['validator-nodes'] = get_api_url('node', 'validator-nodes')
+
+
 
 API_TIMEOUT = 1000  # in seconds
 DEFAULT_TASK_INTERVAL = 60
