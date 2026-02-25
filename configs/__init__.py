@@ -1,4 +1,15 @@
 import os
+from pathlib import Path
+
+from skale_core.settings import (
+    FairBaseSettings,
+    FairSettings,
+    InternalSettings,
+    SkalePassiveSettings,
+    SkaleSettings,
+    get_internal_settings,
+    get_settings,
+)
 
 LONG_LINE = '=' * 100
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -10,8 +21,19 @@ API_PREFIX = '/api'
 CURRENT_API_VERSION = 'v1'
 API_VERSION_PREFIX = os.path.join(API_PREFIX, CURRENT_API_VERSION)
 
-SKALE_NETWORK_TYPE = os.environ.get('SKALE_NETWORK_TYPE', 'skale')
-PASSIVE_NODE = os.getenv('PASSIVE_NODE') == 'True'
+
+SETTINGS_FOLDER_PATH = Path(os.getenv('SETTINGS_FOLDER_PATH', '/settings'))
+NODE_SETTINGS_PATH: Path = SETTINGS_FOLDER_PATH / 'node.toml'
+INTERNAL_SETTINGS_PATH: Path = SETTINGS_FOLDER_PATH / 'internal.toml'
+
+InternalSettings.model_config['toml_file'] = INTERNAL_SETTINGS_PATH
+SkaleSettings.model_config['toml_file'] = NODE_SETTINGS_PATH
+SkalePassiveSettings.model_config['toml_file'] = NODE_SETTINGS_PATH
+FairSettings.model_config['toml_file'] = NODE_SETTINGS_PATH
+FairBaseSettings.model_config['toml_file'] = NODE_SETTINGS_PATH
+
+INTERNAL_ST = get_internal_settings()
+ST = get_settings()
 
 
 def get_api_url(blueprint_name, method_name):
@@ -38,19 +60,13 @@ HEALTHCHECK_ROUTES = {
     },
 }
 
-if not PASSIVE_NODE:
+if not INTERNAL_ST.node_mode == 'passive':
     HEALTHCHECK_ROUTES['common']['sgx'] = get_api_url('info', 'sgx')
     HEALTHCHECK_ROUTES['skale']['schains'] = get_api_url('health', 'schains')
     HEALTHCHECK_ROUTES['skale']['ima'] = get_api_url('health', 'ima')
     HEALTHCHECK_ROUTES['skale']['validator-nodes'] = get_api_url('node', 'validator-nodes')
 
 
-
-API_TIMEOUT = 1000  # in seconds
-DEFAULT_TASK_INTERVAL = 60
-SIGNAL_OFFSET = 20
-DISABLE_BACKGROUND = bool(os.getenv('DISABLE_BACKGROUND') or False)
-
-ENV = os.getenv('ENV')
-ENDPOINT = os.getenv('ENDPOINT')
-SGX_SERVER_URL = os.getenv('SGX_SERVER_URL')
+API_TIMEOUT = int(os.getenv('API_TIMEOUT', '1000'))
+DEFAULT_TASK_INTERVAL = int(os.getenv('DEFAULT_TASK_INTERVAL', '180'))
+SIGNAL_OFFSET = int(os.getenv('SIGNAL_OFFSET', '20'))
