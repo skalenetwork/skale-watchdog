@@ -21,7 +21,7 @@ import importlib
 import logging
 from abc import ABCMeta, abstractmethod
 
-from configs import ENV
+from configs import ST
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ class MemoryCache(Cache):
 
 
 def init_cache():
-    if ENV == 'dev':
+    if ST.env_type == 'dev':
         return MemoryCache()
     else:
         return UwsgiCache()

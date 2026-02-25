@@ -26,10 +26,9 @@ import uwsgi
 
 from configs import (
     DEFAULT_TASK_INTERVAL,
-    DISABLE_BACKGROUND,
     HEALTHCHECK_ROUTES,
+    INTERNAL_ST,
     SIGNAL_OFFSET,
-    SKALE_NETWORK_TYPE,
 )
 from utils.healthchecks import update_check_cache
 from utils.log import init_default_logger
@@ -56,7 +55,7 @@ def init_tasks():
     combined = []
     for check in HEALTHCHECK_ROUTES['common'].keys():
         combined.append(('common', check))
-    net_group = SKALE_NETWORK_TYPE if SKALE_NETWORK_TYPE in HEALTHCHECK_ROUTES else 'fair'
+    net_group = INTERNAL_ST.node_type if INTERNAL_ST.node_type in HEALTHCHECK_ROUTES else 'fair'
     for check in HEALTHCHECK_ROUTES[net_group].keys():
         combined.append((net_group, check))
 
@@ -69,5 +68,4 @@ def init_tasks():
     logger.info('Background tasks initialized')
 
 
-if not DISABLE_BACKGROUND:
-    init_tasks()
+init_tasks()
