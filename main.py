@@ -26,7 +26,7 @@ from flask import Blueprint, Flask, g, request
 from werkzeug.exceptions import InternalServerError
 
 import utils.background_tasks  # noqa
-from configs import HEALTHCHECK_ROUTES, SKALE_NETWORK_TYPE, get_api_url
+from configs import HEALTHCHECK_ROUTES, INTERNAL_ST, get_api_url
 from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
 from utils.healthchecks import get_healthcheck_result
 from utils.log import init_default_logger
@@ -97,7 +97,7 @@ def build_blueprint(group: RouteType) -> Blueprint:
 
 
 app.register_blueprint(build_blueprint('common'))
-if SKALE_NETWORK_TYPE == 'skale':
+if INTERNAL_ST.node_type == 'skale':
     app.register_blueprint(build_blueprint('skale'))
 else:
     app.register_blueprint(build_blueprint('fair'))
