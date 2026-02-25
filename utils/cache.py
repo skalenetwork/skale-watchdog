@@ -21,8 +21,6 @@ import importlib
 import logging
 from abc import ABCMeta, abstractmethod
 
-from configs import ST
-
 logger = logging.getLogger(__name__)
 
 
@@ -84,10 +82,12 @@ class MemoryCache(Cache):
 
 
 def init_cache():
-    if ST.env_type == 'devnet':
-        return MemoryCache()
-    else:
+    try:
+        import uwsgi  # noqa: F401
+
         return UwsgiCache()
+    except ImportError:
+        return MemoryCache()
 
 
 _cache = init_cache()

@@ -4,7 +4,7 @@ import queue
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from multiprocessing import Process, Queue
 from timeit import default_timer as timer
 
@@ -32,8 +32,11 @@ mq_schains: Queue = Queue()
 mq_endpoint: Queue = Queue()
 
 
+REQUEST_SLEEP = 1
+SLOW_ENDPOINT_SLEEP = 3
+
+
 class RequestsHandler(BaseHTTPRequestHandler):
-    REQUEST_SLEEP = 10
     schains_state = 0
     endpoint_state = 0
 
@@ -53,13 +56,13 @@ class RequestsHandler(BaseHTTPRequestHandler):
             return None
 
     def do_GET(self):
-        time.sleep(RequestsHandler.REQUEST_SLEEP)
+        time.sleep(REQUEST_SLEEP)
         if self.path == '/api/v1/info/sgx':
-            time.sleep(20)
+            time.sleep(SLOW_ENDPOINT_SLEEP)
             self._set_headers(code=200)
             response = {'status': 'ok', 'payload': {'sgx': 'ok'}}
         elif self.path == '/api/v1/health/schains':
-            time.sleep(20)
+            time.sleep(SLOW_ENDPOINT_SLEEP)
             msg = self.get_msg(mq_schains)
             self._set_headers(code=200)
             if RequestsHandler.schains_state == 1 or msg == 'schains':
@@ -68,7 +71,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
             else:
                 response = {'status': 'ok', 'payload': {'schains': False}}
         elif self.path == '/api/v1/info/endpoint-info':
-            time.sleep(20)
+            time.sleep(SLOW_ENDPOINT_SLEEP)
             msg = self.get_msg(mq_endpoint)
             if RequestsHandler.endpoint_state == 1 or msg == 'endpoint':
                 RequestsHandler.endpoint_state = 1
@@ -89,7 +92,7 @@ class RequestsHandler(BaseHTTPRequestHandler):
 
 def serve_http_server():
     server_address = ('', API_PORT)
-    httpd = HTTPServer(server_address, RequestsHandler)
+    httpd = ThreadingHTTPServer(server_address, RequestsHandler)
     httpd.serve_forever()
 
 

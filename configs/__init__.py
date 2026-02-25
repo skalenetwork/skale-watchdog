@@ -67,6 +67,6 @@ if not INTERNAL_ST.node_mode == 'passive':
     HEALTHCHECK_ROUTES['skale']['validator-nodes'] = get_api_url('node', 'validator-nodes')
 
 
-API_TIMEOUT = 1000  # in seconds
-DEFAULT_TASK_INTERVAL = 180
-SIGNAL_OFFSET = 20
+API_TIMEOUT = int(os.getenv('API_TIMEOUT', '1000'))
+DEFAULT_TASK_INTERVAL = int(os.getenv('DEFAULT_TASK_INTERVAL', '180'))
+SIGNAL_OFFSET = int(os.getenv('SIGNAL_OFFSET', '20'))
