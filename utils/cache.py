@@ -84,7 +84,7 @@ class MemoryCache(Cache):
 
 
 def init_cache():
-    if ST.env_type == 'dev':
+    if ST.env_type == 'devnet':
         return MemoryCache()
     else:
         return UwsgiCache()
