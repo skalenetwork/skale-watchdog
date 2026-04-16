@@ -39,12 +39,13 @@ def compose_hiding_patterns():
             sgx_ip = urlparse(str(sgx_url)).hostname
     eth_ip = None
     if INTERNAL_ST.node_type != 'fair':
-        eth_url = str(get_settings((BaseNodeSettings, SkaleSettings)).endpoint)
-        eth_ip = urlparse(eth_url).hostname
+        eth_url = getattr(get_settings((BaseNodeSettings, SkaleSettings)), 'endpoint', None)
+        if eth_url:
+            eth_ip = urlparse(str(eth_url)).hostname
     patterns = {r'NEK\:\w+': '[SGX_KEY]'}
-    if sgx_ip not in LOCAL_IPS:
+    if sgx_ip and sgx_ip not in LOCAL_IPS:
         patterns.update({rf'{sgx_ip}': '[SGX_IP]'})
-    if eth_ip not in LOCAL_IPS:
+    if eth_ip and eth_ip not in LOCAL_IPS:
         patterns.update({rf'{eth_ip}': '[ETH_IP]'})
     return patterns
 
