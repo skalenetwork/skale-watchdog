@@ -33,11 +33,12 @@ LOCAL_IPS = ['127.0.0.1', 'localhost']
 
 def compose_hiding_patterns():
     sgx_ip = None
-    if not INTERNAL_ST.node_mode == 'passive':
-        sgx_url = str(get_settings((SkaleSettings, FairSettings)).sgx_url)
-        sgx_ip = urlparse(sgx_url).hostname
+    if INTERNAL_ST.node_mode != 'passive':
+        sgx_url = getattr(get_settings((SkaleSettings, FairSettings)), 'sgx_url', None)
+        if sgx_url:
+            sgx_ip = urlparse(str(sgx_url)).hostname
     eth_ip = None
-    if not INTERNAL_ST.node_type == 'fair':
+    if INTERNAL_ST.node_type != 'fair':
         eth_url = str(get_settings((BaseNodeSettings, SkaleSettings)).endpoint)
         eth_ip = urlparse(eth_url).hostname
     patterns = {r'NEK\:\w+': '[SGX_KEY]'}
