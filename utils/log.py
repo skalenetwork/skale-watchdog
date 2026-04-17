@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 from flask import has_request_context, request
 from skale_core.settings import BaseNodeSettings, FairSettings, SkaleSettings, get_settings
 
-from configs import INTERNAL_ST
+from utils.helper import is_fair, is_passive
 
 LOG_FORMAT = '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
 LOCAL_IPS = ['127.0.0.1', 'localhost']
@@ -33,11 +33,11 @@ LOCAL_IPS = ['127.0.0.1', 'localhost']
 
 def compose_hiding_patterns():
     sgx_ip = None
-    if not INTERNAL_ST.node_type == 'fair':
+    if not is_passive():
         sgx_url = str(get_settings((SkaleSettings, FairSettings)).sgx_url)
         sgx_ip = urlparse(sgx_url).hostname
     eth_ip = None
-    if not INTERNAL_ST.node_type == 'fair':
+    if not is_fair():
         eth_url = str(get_settings((BaseNodeSettings, SkaleSettings)).endpoint)
         eth_ip = urlparse(eth_url).hostname
     patterns = {r'NEK\:\w+': '[SGX_KEY]'}
