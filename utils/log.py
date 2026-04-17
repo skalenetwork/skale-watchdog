@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 from flask import has_request_context, request
 from skale_core.settings import BaseNodeSettings, FairSettings, SkaleSettings, get_settings
 
-from configs import INTERNAL_ST
+from utils.helper import is_fair, is_passive
 
 LOG_FORMAT = '[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s'  # noqa
 LOCAL_IPS = ['127.0.0.1', 'localhost']
@@ -33,19 +33,17 @@ LOCAL_IPS = ['127.0.0.1', 'localhost']
 
 def compose_hiding_patterns():
     sgx_ip = None
-    if INTERNAL_ST.node_mode != 'passive':
-        sgx_url = getattr(get_settings((SkaleSettings, FairSettings)), 'sgx_url', None)
-        if sgx_url:
-            sgx_ip = urlparse(str(sgx_url)).hostname
+    if not is_passive():
+        sgx_url = str(get_settings((SkaleSettings, FairSettings)).sgx_url)
+        sgx_ip = urlparse(sgx_url).hostname
     eth_ip = None
-    if INTERNAL_ST.node_type != 'fair':
-        eth_url = getattr(get_settings((BaseNodeSettings, SkaleSettings)), 'endpoint', None)
-        if eth_url:
-            eth_ip = urlparse(str(eth_url)).hostname
+    if not is_fair():
+        eth_url = str(get_settings((BaseNodeSettings, SkaleSettings)).endpoint)
+        eth_ip = urlparse(eth_url).hostname
     patterns = {r'NEK\:\w+': '[SGX_KEY]'}
-    if sgx_ip and sgx_ip not in LOCAL_IPS:
+    if sgx_ip not in LOCAL_IPS:
         patterns.update({rf'{sgx_ip}': '[SGX_IP]'})
-    if eth_ip and eth_ip not in LOCAL_IPS:
+    if eth_ip not in LOCAL_IPS:
         patterns.update({rf'{eth_ip}': '[ETH_IP]'})
     return patterns
 
