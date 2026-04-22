@@ -1,18 +1,20 @@
 [project]
 name = "skale-watchdog"
-version = "3.1.0"
+version = "3.2.0"
 requires-python = ">=3.13"
 dependencies = [
-    "Flask==3.1.2",
+    "Flask==3.1.3",
     "Jinja2==3.1.6",
-    "uwsgi==2.0.30",
+    "uwsgi==2.0.31",
     "requests==2.32.5",
     "itsdangerous==2.2.0",
+    "skale.py-core==7.13.dev3",
+    "pytest-timeout>=2.4.0",
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.14.0", "mypy==1.18.2", "types-requests==2.32.4.20250913"]
-test = ["pytest==8.4.2", "pytest-cov==7.0.0"]
+dev = ["ruff==0.15.2", "mypy==1.19.1", "types-requests==2.32.4.20260107"]
+test = ["pytest==9.0.2", "pytest-cov==7.0.0"]
 
 [tool.ruff]
 line-length = 100
@@ -38,3 +40,6 @@ log_cli_level = "INFO"
 log_cli_format = "[%(asctime)s] [%(levelname)8s] [%(threadName)s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.setuptools.packages.find]
+include = ["configs", "utils"]
