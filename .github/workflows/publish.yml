@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event.pull_request.merged
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -18,15 +18,13 @@ jobs:
       PIP_USERNAME: ${{ secrets.PIP_USERNAME }}
       PIP_PASSWORD: ${{ secrets.PIP_PASSWORD }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - name: Set up Python 3.13
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
       - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        uses: astral-sh/setup-uv@v5
       - name: Install python dependencies - watchdog_client
         working-directory: ./watchdog_client
         run: |
@@ -47,7 +45,7 @@ jobs:
         run: |
           bash ./scripts/publish.sh
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v5
       - name: Build and publish container
         run: |
           export BRANCH=${GITHUB_REF##*/}
@@ -59,7 +57,7 @@ jobs:
           echo "RELEASE=$RELEASE" >> $GITHUB_ENV
           bash ./scripts/build_and_publish.sh
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v5
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
