@@ -1,4 +1,3 @@
-#   -*- coding: utf-8 -*-
 #
 #   This file is part of SKALE Containers Watchdog
 #
@@ -17,92 +16,55 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
+import json
 import time
-from functools import wraps
+from functools import partial
+from typing import Any
 
-import flask
-from flask import Blueprint, Flask, g, request
-from werkzeug.exceptions import InternalServerError
+from flask import Flask, Response, request
 
-import utils.background_tasks  # noqa
-from configs import HEALTHCHECK_ROUTES, INTERNAL_ST, get_api_url
-from configs.flask import FLASK_APP_HOST, FLASK_APP_PORT, FLASK_DEBUG_MODE
-from utils.healthchecks import get_healthcheck_result
-from utils.log import init_default_logger
-from utils.structures import RouteType, construct_err_response
+from health import CACHE, ROUTES, Ok, Outcome, Route, fetch, start_refresher
+from log import init_default_logger
+from settings import REQUEST_READ_TIMEOUT
 
 init_default_logger()
 
-logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
-
-def healthcheck(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        logger.debug('Incoming request %s', request)
-        data = request.data or '{}'
-        g.options = flask.json.loads(data)
-        logger.debug('%s, options: %s', request, g.options)
-        g.cold = g.options.get('_no_cache', False) if g.options else False
-        return func(*args, **kwargs)
-
-    return wrapper
+LOOPBACK = frozenset({'127.0.0.1', '::1'})
 
 
-@app.before_request
-def before_request():
-    g.request_start_time = time.time()
+def cold() -> bool:
+    if request.args.get('_no_cache') not in ('1', 'true'):
+        return False
+    return request.headers.get('X-Real-IP') in LOOPBACK
 
 
-@app.teardown_request
-def teardown_request(response):
-    elapsed = int(time.time() - g.request_start_time)
-    logger.info(f'Request time elapsed: {elapsed}s')
+def render(outcome: Outcome, age: int | None) -> Response:
+    if isinstance(outcome, Ok):
+        body: dict[str, Any] = {'data': outcome.payload, 'error': None}
+        status = 200
+    else:
+        body = {'data': None, 'error': outcome.message}
+        status = outcome.code
+    response = Response(json.dumps(body), status=status, mimetype='application/json')
+    if age is not None:
+        response.headers['X-Cache-Age'] = str(age)
     return response
 
 
-@app.errorhandler(InternalServerError)
-def handle_500(e):
-    original = getattr(e, 'original_exception', None)
-    logger.exception('Request failed with error %s', original)
-    return construct_err_response(status=500, err=original).to_flask_response()
+def serve(route: Route) -> Response:
+    entry = None if cold() else CACHE.get(route)
+    if entry is None:
+        return render(fetch(route, REQUEST_READ_TIMEOUT), None)
+    return render(entry.outcome, int(time.monotonic() - entry.fetched_at))
 
 
-ROUTE_QUERY_PARAMS = {
-    'common': {
-        'containers': {'all': 'True'},
-    }
-}
+for _route in ROUTES:
+    app.add_url_rule(
+        _route.path,
+        endpoint=f'{_route.group}.{_route.check}',
+        view_func=partial(serve, _route),
+    )
 
-
-def build_blueprint(group: RouteType) -> Blueprint:
-    bp = Blueprint(group, __name__)
-    services = HEALTHCHECK_ROUTES.get(group, {})
-    for service_key in services.keys():
-        rule = service_key
-        params = ROUTE_QUERY_PARAMS.get(group, {}).get(service_key)
-
-        def make_view(_service=service_key, _group=group, _params=params):
-            @healthcheck
-            def view():
-                return get_healthcheck_result(_group, _service, no_cache=g.cold, params=_params)  # type: ignore[arg-type]
-
-            view.__name__ = f'{_group}_{_service}'
-            return view
-
-        bp.route(get_api_url(group, rule), methods=['GET'])(make_view())
-    return bp
-
-
-app.register_blueprint(build_blueprint('common'))
-if INTERNAL_ST.node_type == 'skale':
-    app.register_blueprint(build_blueprint('skale'))
-else:
-    app.register_blueprint(build_blueprint('fair'))
-
-
-if __name__ == '__main__':
-    logger.info('Starting SKALE docker containers Watchdog')
-    app.run(debug=FLASK_DEBUG_MODE, port=FLASK_APP_PORT, host=FLASK_APP_HOST, use_reloader=False)
+start_refresher()

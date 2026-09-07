@@ -3,4 +3,7 @@ set -e
 
 export PYTHONPATH=.
 export SETTINGS_FOLDER_PATH=./tests/settings
-uv run pytest -v -s --cov=./ tests/ --ignore tests/test_uwsgi.py --cov-report term-missing $@
+export UPSTREAM_PORT=3107
+export REFRESH_INTERVAL=99999
+
+uv run pytest -v -s --cov=. tests/ --ignore tests/test_wire.py --cov-report term-missing "$@"

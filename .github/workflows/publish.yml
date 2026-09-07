@@ -1,70 +1,74 @@
-name: Build and publish
+name: Publish
 on:
   pull_request:
     types: [closed]
-    branches:
-      - master
-      - develop
-      - beta
-      - stable
+    branches: [develop, beta, stable]
+
+permissions: {}
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04
+  version:
     if: github.event.pull_request.merged
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      PIP_USERNAME: ${{ secrets.PIP_USERNAME }}
-      PIP_PASSWORD: ${{ secrets.PIP_PASSWORD }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      pep440: ${{ steps.version.outputs.pep440 }}
     steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
         with:
-          python-version: 3.13
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-      - name: Install python dependencies - watchdog_client
-        working-directory: ./watchdog_client
-        run: |
-          uv pip install --system build hatchling
-          uv pip install --system -e .
-          uv pip install --system -e .[dev]
-      - name: Build library
-        working-directory: ./watchdog_client
-        run: |
-          export BRANCH=${GITHUB_REF##*/}
-          echo "Branch $BRANCH"
-          export VERSION=$(bash ./scripts/calculate_version.sh)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version $VERSION"
-          bash ./scripts/build.sh
-      - name: Publish to pip
-        working-directory: ./watchdog_client
-        run: |
-          bash ./scripts/publish.sh
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Build and publish container
-        run: |
-          export BRANCH=${GITHUB_REF##*/}
-          echo "Branch $BRANCH"
-          export VERSION=$(bash ./scripts/calculate_version.sh)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version $VERSION"
-          export RELEASE=true
-          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
-          bash ./scripts/build_and_publish.sh
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - id: version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.event.pull_request.base.ref }}
+        run: scripts/version.sh >> "$GITHUB_OUTPUT"
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          gh release create "${{ steps.version.outputs.tag }}"
+          --target "${{ github.event.pull_request.merge_commit_sha }}"
+          --prerelease=${{ github.event.pull_request.base.ref != 'stable' }}
+          --generate-notes
+
+  pypi:
+    needs: version
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
-          draft: false
-          prerelease: true
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: astral-sh/setup-uv@v10.0.1
+      - working-directory: watchdog_client
+        run: |
+          uv version --frozen "${{ needs.version.outputs.pep440 }}"
+          uv build
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: watchdog_client/dist
+
+  docker:
+    needs: version
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: skalenetwork/watchdog:${{ needs.version.outputs.tag }}
+          provenance: true
+          sbom: true
