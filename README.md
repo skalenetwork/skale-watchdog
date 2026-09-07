@@ -316,8 +316,8 @@ Datetime fields from SKALE Admin are returned as Unix timestamps.
 
 ### Cache and errors
 
-* Send a JSON request body of `{"_no_cache": true}` to force a cold fetch.
-* Response time is logged; caching reduces latency.
+* Append `?_no_cache=1` from the node itself to force a cold fetch. Remote callers are ignored.
+* `X-Cache-Age` gives the age in seconds of a cached response, and is absent when fetched live.
 * Non-200 upstream responses are wrapped with the message in `error` and retain the upstream HTTP status.
 
 ### License
