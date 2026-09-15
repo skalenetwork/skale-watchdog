@@ -17,6 +17,7 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import logging
 import time
 from functools import partial
 from typing import Any
@@ -24,10 +25,12 @@ from typing import Any
 from flask import Flask, Response, request
 
 from health import CACHE, ROUTES, Ok, Outcome, Route, fetch, start_refresher
-from log import init_default_logger
-from settings import REQUEST_READ_TIMEOUT
+from settings import LOG_LEVEL, REQUEST_READ_TIMEOUT
 
-init_default_logger()
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format='[%(asctime)s %(levelname)s] (%(threadName)s) %(name)s:%(lineno)d - %(message)s',
+)
 
 app = Flask(__name__)
 

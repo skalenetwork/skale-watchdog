@@ -70,10 +70,11 @@ def test_fetch_passes_upstream_code_through(code: int) -> None:
     assert outcome == Failure(code, f'Request to {HARDWARE.upstream} failed, code: {code}', True)
 
 
-def test_fetch_does_not_echo_upstream_error_text() -> None:
+def test_fetch_does_not_echo_upstream_error_text(caplog: pytest.LogCaptureFixture) -> None:
     with upstream(body={'status': 'error', 'payload': 'sgx key NEK:secret rejected'}):
         outcome = fetch(HARDWARE, 1)
     assert outcome == Failure(400, f'Request to {HARDWARE.upstream} failed', True)
+    assert 'NEK:secret' not in caplog.text
 
 
 def test_fetch_missing_payload() -> None:

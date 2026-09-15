@@ -128,7 +128,7 @@ def fetch(route: Route, read_timeout: int) -> Outcome:
     if not isinstance(body, dict):
         return Failure(400, f'Could not get data from {route.upstream}', True)
     if body.get('status') == 'error':
-        logger.error('Upstream %s reported: %s', route.upstream, body.get('payload'))
+        logger.error('Upstream %s reported an error', route.upstream)
         return Failure(400, f'Request to {route.upstream} failed', True)
 
     payload = body.get('payload')

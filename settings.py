@@ -20,20 +20,11 @@ import os
 from pathlib import Path
 from typing import Final, Literal
 
-from skale_core.settings import (
-    FairBaseSettings,
-    FairSettings,
-    InternalSettings,
-    SkalePassiveSettings,
-    SkaleSettings,
-    get_internal_settings,
-)
+from skale_core.settings import InternalSettings, get_internal_settings
 
 _FOLDER = Path(os.getenv('SETTINGS_FOLDER_PATH', '/settings'))
 
 InternalSettings.model_config['toml_file'] = _FOLDER / 'internal.toml'
-for _model in (SkaleSettings, SkalePassiveSettings, FairSettings, FairBaseSettings):
-    _model.model_config['toml_file'] = _FOLDER / 'node.toml'
 
 _INTERNAL = get_internal_settings()
 

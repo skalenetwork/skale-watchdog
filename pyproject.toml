@@ -32,7 +32,7 @@ quote-style = "single"
 [tool.mypy]
 python_version = "3.14"
 strict = true
-files = ["main.py", "settings.py", "health.py", "log.py", "tests", "watchdog_client"]
+files = ["main.py", "settings.py", "health.py", "tests", "watchdog_client"]
 
 [[tool.mypy.overrides]]
 module = ["skale_core.*"]
