@@ -34,22 +34,21 @@ jobs:
   pypi:
     needs: version
     runs-on: ubuntu-24.04
-    environment: pypi
     permissions:
       contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: astral-sh/setup-uv@v10.0.1
       - working-directory: watchdog_client
+        env:
+          UV_PUBLISH_USERNAME: ${{ secrets.PIP_USERNAME }}
+          UV_PUBLISH_PASSWORD: ${{ secrets.PIP_PASSWORD }}
         run: |
           uv version --frozen "${{ needs.version.outputs.pep440 }}"
           uv build
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: watchdog_client/dist
+          uv publish
 
   docker:
     needs: version
