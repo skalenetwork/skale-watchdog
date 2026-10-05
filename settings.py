@@ -1,4 +1,3 @@
-#   -*- coding: utf-8 -*-
 #
 #   This file is part of SKALE Containers Watchdog
 #
@@ -18,7 +17,23 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from pathlib import Path
+from typing import Final, Literal
 
-FLASK_APP_HOST = os.environ['FLASK_APP_HOST']
-FLASK_APP_PORT = int(os.environ['FLASK_APP_PORT'])
-FLASK_DEBUG_MODE = os.environ['FLASK_DEBUG_MODE'] == 'True'
+from skale_core.settings import InternalSettings, get_internal_settings
+
+_FOLDER = Path(os.getenv('SETTINGS_FOLDER_PATH', '/settings'))
+
+InternalSettings.model_config['toml_file'] = _FOLDER / 'internal.toml'
+
+_INTERNAL = get_internal_settings()
+
+NODE_GROUP: Final[Literal['skale', 'fair']] = 'skale' if _INTERNAL.node_type == 'skale' else 'fair'
+PASSIVE: Final[bool] = _INTERNAL.node_mode == 'passive'
+
+UPSTREAM_PORT: Final[int] = int(os.getenv('UPSTREAM_PORT', '3007'))
+UPSTREAM_CONNECT_TIMEOUT: Final[int] = 3
+REQUEST_READ_TIMEOUT: Final[int] = 25
+REFRESH_READ_TIMEOUT: Final[int] = 60
+REFRESH_INTERVAL: Final[int] = int(os.getenv('REFRESH_INTERVAL', '180'))
+LOG_LEVEL: Final[str] = os.getenv('LOG_LEVEL', 'INFO')
