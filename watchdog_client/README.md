@@ -18,6 +18,7 @@ Supports Python 3.13+.
 from watchdog_client import SkaleNode, SkalePassiveNode, FairNode, FairPassiveNode
 
 # Base URL can be domain name or IP address of the node.
+# A bare host or http:// URL gets :3009, https:// gets :311. An explicit port always wins.
 skale_node = SkaleNode('my-skale-node.example.com')
 # Use SkalePassiveNode for SKALE nodes running in passive mode
 skale_passive = SkalePassiveNode('my-passive-skale-node.example.com')
@@ -26,17 +27,19 @@ fair_node = FairNode('my-fair-node.example.com')
 # Use FairPassiveNode for FAIR nodes running in passive mode (no SGX endpoint)
 fair_passive = FairPassiveNode('my-passive-fair-node.example.com')
 
-# Call any endpoint – each returns ApiResult (fields: data, error, status_code)
+# Call any endpoint: each returns ApiResult (fields: data, error, status_code, cache_age, stale)
+# cache_age is seconds since the node cached the value, or None when it was fetched live.
+# Pass max_age=360 to the node: any result older than that is stale and falsy.
 r = skale_node.public_ip()
 if r:
-	print('Public IP:', r.data)
+    print('Public IP:', r.data)
 else:
-	print('Error:', r.error)
+    print('Error:', r.error)
 
 # Execute every available check on a node
 results = skale_node.all_checks()
 for name, res in results.items():
-	print(name, 'OK' if res else f'ERR: {res.error}')
+    print(name, 'OK' if res else f'ERR: {res.error}')
 ```
 
 ## API
@@ -78,7 +81,7 @@ Same as `SkaleNode`, except the following checks return an error (404), because 
 
 Same as `FairNode`, except:
 
-* sgx — returns an error ApiResult: "SGX check is not available on FAIR passive nodes"
+* sgx: returns an error ApiResult: "SGX check is not available on FAIR passive nodes"
 
 ### Batch execution
 
@@ -87,11 +90,11 @@ Call `all_checks()` on any node instance to execute each public check method (no
 ## Result Object
 
 ```python
-res = fair.chain_checks()
+res = fair_node.chain_checks()
 if res:
-	print(res.data)
+    print(res.data)
 else:
-	raise RuntimeError(res.error)
+    raise RuntimeError(res.error)
 ```
 
 ### License
