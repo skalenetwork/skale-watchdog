@@ -45,6 +45,7 @@ def upstream() -> Iterator[None]:
         pytest.fail('watchdog never served a warm response')
     yield
     server.shutdown()
+    server.server_close()
 
 
 def get(path: str, **kwargs: Any) -> requests.Response:

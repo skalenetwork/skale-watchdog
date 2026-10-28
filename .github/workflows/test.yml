@@ -1,5 +1,5 @@
 name: Test
-on: [push, pull_request]
+on: [push]
 
 permissions: {}
 
@@ -10,7 +10,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
       - name: Install dependencies
         run: uv sync --locked --all-extras
       - name: Ruff

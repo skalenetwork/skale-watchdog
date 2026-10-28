@@ -40,15 +40,18 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
-      - uses: astral-sh/setup-uv@v10.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
+      - working-directory: watchdog_client
+        run: |
+          uv version --frozen "${{ needs.version.outputs.pep440 }}"
+          uv build
       - working-directory: watchdog_client
         env:
           UV_PUBLISH_USERNAME: ${{ secrets.PIP_USERNAME }}
           UV_PUBLISH_PASSWORD: ${{ secrets.PIP_PASSWORD }}
-        run: |
-          uv version --frozen "${{ needs.version.outputs.pep440 }}"
-          uv build
-          uv publish
+        run: uv publish
 
   docker:
     needs: version
@@ -69,5 +72,4 @@ jobs:
           context: .
           push: true
           tags: skalenetwork/watchdog:${{ needs.version.outputs.tag }}
-          provenance: true
           sbom: true
