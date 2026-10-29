@@ -8,15 +8,16 @@ version = "0.0.0"
 description = "SKALE Watchdog Client - SKALE and FAIR Nodes Health Checks"
 authors = [{ name = "SKALE Labs", email = "support@skalelabs.com" }]
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "AGPL-3.0-or-later"
 requires-python = ">=3.13,<4"
-dependencies = ["requests>=2.31.0"]
+dependencies = ["requests>=2.33.0"]
 keywords = ["skale"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]

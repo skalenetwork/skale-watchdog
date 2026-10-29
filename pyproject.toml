@@ -1,21 +1,17 @@
 [project]
 name = "skale-watchdog"
-version = "4.0.0"
+version = "4.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "Flask==3.1.3",
-    "granian==2.8.2",
+    "granian==2.8.6",
     "requests==2.34.2",
-    "skale.py-core==7.13.dev3",
+    "skale.py-core==8.0dev0",
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.16.5", "mypy==2.3.1", "types-requests==2.32.4.20260107"]
-test = ["pytest==9.1.1", "pytest-cov==7.0.0", "pytest-timeout==2.4.0"]
-
-[tool.uv]
-package = false
-prerelease = "allow"
+dev = ["ruff==0.17.3", "mypy==2.4.0"]
+test = ["pytest==9.2.0"]
 
 [tool.ruff]
 line-length = 100
@@ -33,13 +29,3 @@ quote-style = "single"
 python_version = "3.14"
 strict = true
 files = ["main.py", "settings.py", "health.py", "tests", "watchdog_client"]
-
-[[tool.mypy.overrides]]
-module = ["skale_core.*"]
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-filterwarnings = ["ignore::DeprecationWarning"]
-
-[tool.coverage.run]
-omit = ["tests/*"]

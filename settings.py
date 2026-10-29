@@ -18,7 +18,7 @@
 
 import os
 from pathlib import Path
-from typing import Final, Literal
+from typing import Final
 
 from skale_core.settings import InternalSettings, get_internal_settings
 
@@ -28,7 +28,7 @@ InternalSettings.model_config['toml_file'] = _FOLDER / 'internal.toml'
 
 _INTERNAL = get_internal_settings()
 
-NODE_GROUP: Final[Literal['skale', 'fair']] = 'skale' if _INTERNAL.node_type == 'skale' else 'fair'
+NODE_GROUP: Final = _INTERNAL.node_type
 PASSIVE: Final[bool] = _INTERNAL.node_mode == 'passive'
 
 UPSTREAM_PORT: Final[int] = int(os.getenv('UPSTREAM_PORT', '3007'))
