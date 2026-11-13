@@ -42,7 +42,7 @@ jobs:
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: astral-sh/setup-uv@v10.3.3
         with:
-          version: "0.13.6"
+          version: "0.13.8"
       - working-directory: watchdog_client
         run: |
           uv version --frozen "${{ needs.version.outputs.pep440 }}"
