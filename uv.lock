@@ -720,15 +720,15 @@ wheels = [
 
 [[package]]
 name = "skale-py-core"
-version = "8.0.dev0"
+version = "8.0.dev3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic-settings" },
     { name = "tomli-w" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/0f/b1e52dd2f2fbb4847c4cdfc74358d4b0c6776540c179fb61fad0c721a5f0/skale_py_core-8.0.dev0.tar.gz", hash = "sha256:631bcc8eb2b39eee83252be04f11914f02a941f0289adb410fc975f6e38d7d3b", size = 4461, upload-time = "2026-10-27T19:02:36.819Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a0/17/766d89992b614c81a81efc6afebf4c2df65de7abd2ae16db694ea0fbf733/skale_py_core-8.0.dev3.tar.gz", hash = "sha256:4b3672078068d907de4fea5948d435b0abdbc060c10e6b00ca6fb8221a39b185", size = 4462, upload-time = "2026-11-17T18:43:03.079Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/e2/b24e42136a8518611a62593d296aa16be157c355746ff7417f05f1b35760/skale_py_core-8.0.dev0-py3-none-any.whl", hash = "sha256:d11149bcf89ac88c5a24f32fe10ebe01bbfba75468420083d677471f1bce4579", size = 6252, upload-time = "2026-10-27T19:02:35.776Z" },
+    { url = "https://files.pythonhosted.org/packages/fc/9e/717fb73a9eb5afbe778035ff81415fa468c1092baebe3ad3e9befc50b0f3/skale_py_core-8.0.dev3-py3-none-any.whl", hash = "sha256:9d3cba846fd4d1572f8f6b11d8b71bfa2cfe49134e1c3ac41af5e9026745641c", size = 6252, upload-time = "2026-11-17T18:43:02.225Z" },
 ]
 
 [[package]]
@@ -759,7 +759,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'test'", specifier = "==9.2.0" },
     { name = "requests", specifier = "==2.34.2" },
     { name = "ruff", marker = "extra == 'dev'", specifier = "==0.17.5" },
-    { name = "skale-py-core", specifier = "==8.0.dev0" },
+    { name = "skale-py-core", specifier = "==8.0.dev3" },
 ]
 provides-extras = ["dev", "test"]
 
