@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1.30.6
+    image: nginx:1.30.7
     network_mode: host
     depends_on:
       - watchdog
