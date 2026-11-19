@@ -70,7 +70,7 @@ class NodeBase:
         return self._get(self._path(self.common_bp, 'check-report'), params)
 
     def all_checks(self) -> dict[str, ApiResult]:
-        excluded_names = {'all_checks', 'session', 'base_url', 'timeout'}
+        excluded_names = {'all_checks'}
         if self.__class__.__name__ == 'FairPassiveNode':
             excluded_names.add('sgx')
         if self.__class__.__name__ == 'SkalePassiveNode':

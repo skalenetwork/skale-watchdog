@@ -47,7 +47,7 @@ for name, res in results.items():
 ### Common (available on both SkaleNode and FairNode)
 
 * containers
-* sgx (not available on FAIR passive nodes; see FairPassiveNode)
+* sgx (not available on passive nodes)
 * hardware
 * endpoint
 * meta\_info (maps to /meta-info)
